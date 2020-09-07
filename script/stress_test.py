@@ -8,18 +8,20 @@ import time
 
 # initialize the Keras REST API endpoint URL along with the input
 # image path
-KERAS_REST_API_URL = "http://localhost/predictor"
-IMAGE_PATH = "/home/ben/test_clips/arrest_clip_frame_108.png"
+
+KERAS_REST_API_URL = "http://fast/predictor/"
+IMAGE_PATH = "/images/demo-face.jpeg"
 
 # initialize the number of requests for the stress test along with
 # the sleep amount between requests
-NUM_REQUESTS = 500
+NUM_REQUESTS = 10
 SLEEP_COUNT = 0.05
 
+image = open(IMAGE_PATH, "rb").read()
 def call_predict_endpoint(n):
 	# load the input image and construct the payload for the request
-	image = open(IMAGE_PATH, "rb").read()
-	payload = {"image": image}
+	
+	payload = {"file": image, "type": "image/png"}
 
 	# submit the request
 	r = requests.post(KERAS_REST_API_URL, files=payload).json()

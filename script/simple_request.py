@@ -6,12 +6,12 @@ import requests
 
 # initialize the Keras REST API endpoint URL along with the input
 # image path
-KERAS_REST_API_URL = "http://fast.localhost/predictor/"
+KERAS_REST_API_URL = "http://fast/predictor/"
 IMAGE_PATH = "/images/demo-face.jpeg"
 
 # load the input image and construct the payload for the request
 image = open(IMAGE_PATH, "rb").read()
-payload = {"image": image}
+payload = {"file": image, "type": "image/png"}
 
 # submit the request
 r = requests.post(KERAS_REST_API_URL, files=payload).json()
@@ -20,8 +20,7 @@ r = requests.post(KERAS_REST_API_URL, files=payload).json()
 if r["success"]:
 	# loop over the predictions and display them
 	for (i, result) in enumerate(r["predictions"]):
-		print("{}. {}: {:.4f}".format(i + 1, result["label"],
-			result["probability"]))
+		print(f"{i + 1}. {result}")
 
 # otherwise, the request failed
 else:

@@ -49,6 +49,28 @@ services:
       - ./script:/script
     entrypoint: /start-reload.sh
 
+  modelserv:
+    image: modelserv:latest
+    build:
+      context: .
+      dockerfile: ./modelserv/Dockerfile
+    container_name: "modelserv"
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.modelserv.rule=Host(`modelserv.localhost`)"
+      - "traefik.http.routers.modelserv.entrypoints=web"
+    volumes:
+      - ./app:/app/app
+      - ./images:/images
+      - ./script:/script
+
+
+
+
+
   redis:
     image: redis:6
     restart: always
