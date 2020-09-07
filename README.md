@@ -1,11 +1,14 @@
 
 
 
-
-Launch on localhost:
+Build image from command
+```bash
+cd keras-model-server-fast-api/app
+docker build -t fast .
+```
+Launch on localhost using docker-compose:
 ```bash
 cd keras-model-server-fast-api
-docker build -t fast .
 docker network create traefik-public
 docker-compose up --build
 ```
