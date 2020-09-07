@@ -1,5 +1,5 @@
 # initialize Redis connection settings
-REDIS_HOST = "172.17.0.2"
+REDIS_HOST = "redis"
 REDIS_PORT = 6379
 REDIS_DB = 0
 
