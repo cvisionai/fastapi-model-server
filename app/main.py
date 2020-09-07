@@ -5,8 +5,8 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from PIL import Image
 import numpy as np
-import settings
-import helpers
+import app.settings as settings
+import app.helpers as helpers
 import redis
 import uuid
 import time
@@ -16,6 +16,9 @@ import io
 app = FastAPI()
 db = redis.StrictRedis(host=settings.REDIS_HOST,
     port=settings.REDIS_PORT, db=settings.REDIS_DB)
+db.ping() 
+
+print(f"connected to redis: {settings.REDIS_HOST}") 
 
 def prepare_image(image, target):
     # if the image mode is not RGB, convert it
@@ -44,7 +47,7 @@ def predict(file: UploadFile = File(...)):
     # initialize the data dictionary that will be returned from the
     # view
     data = {"success": False}
-
+    print(f"  - in predict!")
     # ensure an image was properly uploaded to our endpoint
     # read the image in PIL format and prepare it for
     # classification
@@ -53,7 +56,7 @@ def predict(file: UploadFile = File(...)):
     image = Image.open(file.file)
     image = prepare_image(image,
         (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
-
+    print(f"  - image prepared!")
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")
@@ -64,7 +67,7 @@ def predict(file: UploadFile = File(...)):
     image = helpers.base64_encode_image(image)
     d = {"id": k, "image": image}
     db.rpush(settings.IMAGE_QUEUE, json.dumps(d))
-
+    print(f"  - starting loop! {json.dumps(d)}")
     # keep looping until our model server returns the output
     # predictions
     while True:
@@ -73,6 +76,7 @@ def predict(file: UploadFile = File(...)):
 
         # check to see if our model has classified the input
         # image
+        print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client

@@ -1,0 +1,79 @@
+version: "3.3"
+
+services:
+
+  traefik:
+    image: "traefik:v2.2"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    networks:
+      - backend
+      - traefik-public
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  whoami:
+    image: "containous/whoami"
+    container_name: "simple-service"
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+
+
+  fast:
+    image: fast:latest
+    build: ./app/
+    container_name: "fast"
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fast.rule=Host(`fast.localhost`)"
+      - "traefik.http.routers.fast.entrypoints=web"
+    volumes:
+      - ./app:/app/app
+      - ./images:/images
+      - ./script:/script
+    entrypoint: /start-reload.sh
+
+  redis:
+    image: redis:6
+    restart: always
+    container_name: "redis"
+    # ports:
+    #   - "6379:6379"
+    # networks:
+    #   - backend
+    # labels:
+      # - "traefik.enable=true"
+      # - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
+      # - "traefik.http.routers.whoami.entrypoints=web"
+      
+    # launch Redis in cache mode with :
+    #  - max memory up to 50% of your RAM if needed (--maxmemory 512mb)
+    #  - deleting oldest data when max memory is reached (--maxmemory-policy allkeys-lru)
+    networks:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
+      - "traefik.port=6379"
+    entrypoint: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+networks:
+  traefik-public:
+    external: true
+  backend:
+    external: false
