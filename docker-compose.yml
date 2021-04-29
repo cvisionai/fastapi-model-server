@@ -47,6 +47,7 @@ services:
       - ./app:/app/app
       - ./images:/images
       - ./script:/script
+      - ./static-files:/static-files
     entrypoint: /start-reload.sh
 
   modelserv:

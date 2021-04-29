@@ -1,0 +1,154 @@
+<html>
+  <head>
+    <title>Model Server Front End</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: Verdana,Geneva,sans-serif;
+        font-size: 1em;
+      }
+      html {
+        background: #242526;
+        color: #18191A;
+      }
+      .container {
+        width: 90%;
+        margin: 5% auto;
+        border-radius: 5px;
+        background: #e4e6eb;
+        border: 1px solid #666;
+        padding: 5%;
+      }
+      input[type="submit"][disabled]:hover {
+        background: #B0B3B8;
+      }
+      input[type="submit"]:not([disabled]){
+        background:green;
+      }
+      input[type="submit"] {
+        background: #B0B3B8;
+        width: 200px;
+        height: 50px;
+        font-size: 1.5em;
+        border: solid 1px transparent;
+        border-radius: 15px;
+        color: #fff;
+      }
+      input[type="submit"]:hover {
+        background: #3A3B3C;
+        color: white;
+        cursor: pointer;
+      }
+
+    </style>
+  </head>
+  <body class="container">
+    <div style="float: left; width: 50%">
+      <h1>Model Server Front End</h1>
+      <form id="msfe">
+        <div style="margin: 15px 0">
+          <p>Preview</p>
+          <img id="preview" style="background-color: #ccc; border: 1px solid #666; width: 200px; height: 150px; border-radius: 5px;" />
+        </div>
+        <label style="margin: 15px 0">
+          <span hidden>File Upload:</span>
+          <input type="file" name="file_upload" id="file_upload" />
+        </label>
+        <div id="hiddenError" style="color: red;" hidden></div>
+        <input type="submit" id="submit" value="Submit" style="margin: 15px 0" disabled>
+      </form>
+    </div>
+    <div style="float: left; width: 50%">
+      <h2>Results</h2>
+      <div>
+        <div id="results">N/A</div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const form = document.getElementById("msfe");
+      const submitButton = document.getElementById("submit");
+      const fileInput = document.getElementById("file_upload");
+      const hiddenError = document.getElementById("hiddenError");
+      const previewImg = document.getElementById("preview");
+      const results = document.getElementById("results");
+      
+      const validateAndSubmit = (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        const validation = validateFile(file);
+        hiddenError.innerHTML = `${validation.message}`;
+
+        if( validation.ok ){
+          return postFile(file);
+        }
+      }
+
+      const preview = (file) => {
+        if(file){
+          previewImg.src = URL.createObjectURL( file );
+        } else {
+          previewImg.src = "";
+        }
+        
+      }
+
+      const validateFile = (file) => {
+        if(file){
+          submitButton.disabled = false;
+          return {ok: true, message: ""};
+        } else {
+          submitButton.disabled = true;
+          return {ok: false, message: "Error with file"};         
+        }
+
+      }
+
+      const postFile = (file) => {
+        var myHeaders = new Headers();
+        myHeaders.append("Accept", "application/json");
+        myHeaders.append("Content-Type", "multipart/form-data");
+
+        var formdata = new FormData();
+        formdata.append("file", file, "[PROXY]");
+        formdata.append("type", "image/jpg");
+
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: formdata,
+          redirect: 'follow'
+        };
+
+        const responseOK = false;
+        fetch("http://fast.localhost/predictor", requestOptions)
+          .then(response => {
+            response.text();
+            if(response.ok) responseOK = true;
+          })
+          .then(result => {
+            console.log(result);
+            if(responseOK) results.classList.remove("error");
+            if(!responseOK) results.classList.add("error");
+            results.innerHTML = result;
+          })
+          .catch(error => {
+            console.log('error', error);
+            results.classList.add("error");
+            results.innerHTML = error;
+          });
+      }
+
+      const validateAndPreview = ()=>{
+        console.log(fileInput);
+        console.log(fileInput.value);
+        const file = fileInput.files[0];
+        validateFile(file);
+        preview(file);
+      }
+
+      // Page listeners
+      form.addEventListener("submit", validateAndSubmit);
+      fileInput.addEventListener("change", validateAndPreview);
+    </script>
+  </body>
+</html

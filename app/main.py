@@ -3,6 +3,8 @@ from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from PIL import Image
 import numpy as np
 import app.settings as settings
@@ -14,6 +16,25 @@ import json
 import io
 
 app = FastAPI()
+
+origins = [
+    "http://fast.localhost",
+    "http://fast.localhost:8080",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+app.mount("/static", StaticFiles(directory="/static-files"), name="static")
+
 db = redis.StrictRedis(host=settings.REDIS_HOST,
     port=settings.REDIS_PORT, db=settings.REDIS_DB)
 db.ping() 
