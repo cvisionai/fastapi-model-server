@@ -12,6 +12,12 @@ import keras
 db = redis.StrictRedis(host=settings.REDIS_HOST,
     port=settings.REDIS_PORT, db=settings.REDIS_DB)
 
+# TODO make this a config file to be set on server launch when choosing the model
+category_mapping = {
+	0 : "background",
+    1 : "face"
+}
+
 def classify_process():
     SCORE_THRESHOLD = 0.4
     # load the pre-trained Keras model (here we are using a model
@@ -86,7 +92,7 @@ def classify_process():
                     # append detections for each positively labeled class
                     if float(detection[4 + label]) > SCORE_THRESHOLD:
                         image_result = {
-                            'category_id' : str(label),
+                            'category_id' : category_mapping.get(label),
                             'scores'      : [str(det) for i,det in 
                                             enumerate(detection) if i >= 4],
                             'bbox'        : str((detection[:4]).tolist()),
