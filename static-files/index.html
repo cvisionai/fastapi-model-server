@@ -11,6 +11,21 @@
         background: #242526;
         color: #18191A;
       }
+      .top_bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+      }
+      h1 {
+        color: #e4e6eb;
+        font-size: 3em;
+
+      }
       .container {
         width: 90%;
         margin: 5% auto;
@@ -18,6 +33,9 @@
         background: #e4e6eb;
         border: 1px solid #666;
         padding: 5%;
+        display: table;
+        content: "";
+        clear: both;
       }
       input[type="submit"][disabled]:hover {
         background: #B0B3B8;
@@ -42,36 +60,56 @@
 
     </style>
   </head>
-  <body class="container">
-    <div style="float: left; width: 50%">
-      <h1>Model Server Front End</h1>
-      <form id="msfe">
-        <div style="margin: 15px 0">
-          <p>Preview</p>
-          <img id="preview" style="background-color: #ccc; border: 1px solid #666; width: 200px; height: 150px; border-radius: 5px;" />
+  <body >
+    <div class="top_bar"> <h1>Model Server Front End</h1> </div>
+    <div class="container">
+      <div style="float: left; width: 50%">
+        <form id="msfe">
+          <div style="margin: 15px 0">
+            <h2>Preview</h2>
+            <p><i>File size: <span id="fileSize"></span></i></span></p>
+            <p><i>File type: <span id="fileType"></span></i></span></p>
+            <img id="preview" style="background-color: #ccc; border: 1px solid #666; width: 200px; height: 150px; border-radius: 5px;" />
+          </div>
+          <label style="margin: 15px 0">
+            <span hidden>File Upload:</span>
+            <input type="file" name="file" id="file_upload" />
+            <!-- <input type="hidden" name="type" value="image/jpg" /> -->
+          </label>
+          <div id="hiddenError" style="color: red;" hidden></div>
+          <input type="submit" id="submit" value="Submit" style="margin: 15px 0" disabled>
+        </form>
+        <!-- <form id="restrictions">
+          <h2>File type validation</h2>
+          <label>Validate file before upload? <input type="checkbox" id="validate_bool" name="validate_bool"></label>
+          <label>File size: <input type="text" id="fileSize_spec" name="fileSize_spec"></label>
+          <label>File type: <input type="text" id="fileType_spec" name="fileType_spec"></label>
+        </form> -->
+      </div>
+      <div style="float: left; width: 50%">
+        <h2>Results</h2>
+        <div>
+          <div id="success">Success: N/A</div>
+          <h3>Predictions</h3>
+          <div id="predictions">N/A</div>
         </div>
-        <label style="margin: 15px 0">
-          <span hidden>File Upload:</span>
-          <input type="file" name="file_upload" id="file_upload" />
-        </label>
-        <div id="hiddenError" style="color: red;" hidden></div>
-        <input type="submit" id="submit" value="Submit" style="margin: 15px 0" disabled>
-      </form>
-    </div>
-    <div style="float: left; width: 50%">
-      <h2>Results</h2>
-      <div>
-        <div id="results">N/A</div>
       </div>
     </div>
+
+
+
+
+
     <script type="text/javascript">
       const form = document.getElementById("msfe");
       const submitButton = document.getElementById("submit");
       const fileInput = document.getElementById("file_upload");
       const hiddenError = document.getElementById("hiddenError");
       const previewImg = document.getElementById("preview");
-      const results = document.getElementById("results");
-      
+
+      const successEl = document.getElementById("success");
+      const predictionsEl = document.getElementById("predictions");;
+
       const validateAndSubmit = (e) => {
         e.preventDefault();
         const file = fileInput.files[0];
@@ -79,17 +117,19 @@
         hiddenError.innerHTML = `${validation.message}`;
 
         if( validation.ok ){
-          return postFile(file);
+          return postFile();
         }
       }
 
       const preview = (file) => {
         if(file){
+          document.getElementById("fileSize").innerHTML = file.size;
+          document.getElementById("fileType").innerHTML = file.type;
           previewImg.src = URL.createObjectURL( file );
         } else {
           previewImg.src = "";
         }
-        
+
       }
 
       const validateFile = (file) => {
@@ -98,49 +138,94 @@
           return {ok: true, message: ""};
         } else {
           submitButton.disabled = true;
-          return {ok: false, message: "Error with file"};         
+          return {ok: false, message: "Error with file"};
         }
 
       }
 
-      const postFile = (file) => {
-        var myHeaders = new Headers();
-        myHeaders.append("Accept", "application/json");
-        myHeaders.append("Content-Type", "multipart/form-data");
+      const postFile = () => {
+         var myHeaders = new Headers();
+         myHeaders.append("Accept", "*/*");
+         myHeaders.append("Connection", "keep-alive");
+         myHeaders.append("Host", "http://fast.localhost/");
 
-        var formdata = new FormData();
-        formdata.append("file", file, "[PROXY]");
-        formdata.append("type", "image/jpg");
+         /* Do NOT send content-type */
+         // myHeaders.append("Content-Type", 'multipart/form-data;boundary=""');
 
-        var requestOptions = {
-          method: 'POST',
-          headers: myHeaders,
-          body: formdata,
-          redirect: 'follow'
-        };
 
-        const responseOK = false;
-        fetch("http://fast.localhost/predictor", requestOptions)
-          .then(response => {
-            response.text();
-            if(response.ok) responseOK = true;
-          })
-          .then(result => {
-            console.log(result);
-            if(responseOK) results.classList.remove("error");
-            if(!responseOK) results.classList.add("error");
-            results.innerHTML = result;
-          })
-          .catch(error => {
-            console.log('error', error);
-            results.classList.add("error");
-            results.innerHTML = error;
-          });
+        //  const fakeData = {
+        //     "success": true,
+        //     "predictions": [
+        //         {
+        //             "category_id": "Eel",
+        //             "scores": [
+        //                 "0.0",
+        //                 "0.9676675"
+        //             ],
+        //             "bbox": "[273.6246643066406, 0.0, 446.3753356933594, 1.0]"
+        //         }
+        //     ]
+        // };
+
+        // return handleData(fakeData);
+
+         var formdata = new FormData();
+         formdata.append("file", fileInput.files[0]);
+
+         var requestOptions = {
+           method: 'POST',
+           headers: myHeaders,
+           body: formdata,
+           redirect: 'follow'
+         };
+
+         fetch("http://fast.localhost/predictor/", requestOptions)
+         .then(response => response.json())
+         .then(data => {
+           console.log(data);
+           return handleData(fakeData);
+         })
+         .catch(error => console.log('error', error));
+      }
+
+      const handleData = (data) => {
+        if(data.success !== null){
+          successEl.innerHTML = `Success: ${data.success}`;
+        }
+        if(data.predictions !== null){
+          predictionsEl.innerHTML = "";
+          for(let prediction of data.predictions){
+            let predictionNode = document.createElement("div");
+            let categoryId = document.createElement("p");
+            let scores = document.createElement("p");
+            let bbox = document.createElement("p");
+
+            if(prediction.category_id !== null){
+              categoryId.textContent = `Category ID: ${prediction.category_id}`;
+              predictionNode.appendChild(categoryId);
+            }
+
+            if(prediction.scores !== null){
+              scores.innerHTML = "Scores: <br/>"
+              for(let score of prediction.scores){
+                scores.innerHTML += `${score} <br/>`;
+              }
+              predictionNode.appendChild(scores);
+            }
+
+            if(prediction.bbox !== null){
+              bbox.textContent = `Bounding Box: ${prediction.bbox}`;
+              predictionNode.appendChild(bbox);
+            }
+
+            predictionsEl.appendChild( predictionNode );
+          }
+        } else {
+          predictionsEl.innerHTML = "N/A";
+        }
       }
 
       const validateAndPreview = ()=>{
-        console.log(fileInput);
-        console.log(fileInput.value);
         const file = fileInput.files[0];
         validateFile(file);
         preview(file);
@@ -151,4 +236,4 @@
       fileInput.addEventListener("change", validateAndPreview);
     </script>
   </body>
-</html
+</html>
