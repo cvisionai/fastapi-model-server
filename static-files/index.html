@@ -147,7 +147,7 @@
          var myHeaders = new Headers();
          myHeaders.append("Accept", "*/*");
          myHeaders.append("Connection", "keep-alive");
-         myHeaders.append("Host", "http://fast.localhost/");
+         myHeaders.append("Host", "http://ocalhost/");
 
          /* Do NOT send content-type */
          // myHeaders.append("Content-Type", 'multipart/form-data;boundary=""');
@@ -179,7 +179,7 @@
            redirect: 'follow'
          };
 
-         fetch("http://fast.localhost/predictor/", requestOptions)
+         fetch("http://localhost:8082/predictor/", requestOptions)
          .then(response => response.json())
          .then(data => {
            console.log(data);

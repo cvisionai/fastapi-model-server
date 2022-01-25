@@ -1,0 +1,5 @@
+###### Model Params
+model_config_file : 'fathomnet_config_v2_1280.yaml'
+model_weights_file : 'model_final.pth'
+# Threshold for visualizing boxes
+score_threshold : 0.4
