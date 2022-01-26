@@ -2,6 +2,7 @@
 import torchvision
 import os
 import torch
+import logging
 
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
@@ -15,6 +16,16 @@ import helpers
 import redis
 import time
 import json
+import random
+
+logging.basicConfig(
+    handlers=[logging.StreamHandler()],
+    format="%(asctime)s %(levelname)s:%(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+    level=logging.INFO,
+)
+
+logger = logging.getLogger(__name__)
 
 # connect to Redis server
 db = redis.StrictRedis(host=settings.REDIS_HOST,
@@ -71,10 +82,13 @@ def create_augmentations():
     #return [aug1, aug2, aug3]
     return [aug1]
 
-def augment_images(augs, image):
+def augment_images(augs, image_batch):
     '''Generate augmented images based on list of input augmentations
     '''
-    aug_imgs = {f"im_{i}" : augs[i].get_transform(image).apply_image(image) for i in range(len(augs))}
+    if len(image_batch) > 0:
+        aug_imgs = []
+        for img in image_batch:
+            aug_imgs.append({f"im_{i}" : augs[i].get_transform(img).apply_image(img) for i in range(len(augs))})
     return aug_imgs
 
 def process_nms(model_outputs):
@@ -157,9 +171,9 @@ def classify_process():
     args['score_threshold'] = 0.4
     args = DictToDotNotation(args)
 
-    print("Loading model...")
+    logger.info("Loading model...")
     model = load_model(args)
-    print("Loading complete!")
+    logger.info("Loading complete!")
 
     augs = create_augmentations()
     label_map = create_labelset()
@@ -169,6 +183,9 @@ def classify_process():
         # initialize the image IDs and batch of images themselves
         queue = db.lrange(settings.IMAGE_QUEUE, 0,
             settings.BATCH_SIZE - 1)
+
+        # remove the set of images from our queue
+        db.ltrim(settings.IMAGE_QUEUE, len(queue), -1)
         imageIDs = []
         batch = None
 
@@ -194,27 +211,31 @@ def classify_process():
 
         # check to see if we need to process the batch
         if len(imageIDs) > 0:
+            logger.info(imageIDs)
             batch_results = []
 
             #im_height,im_width,_ = frame.shape
             # Create augmented images based on list of augmentations
-            print(batch[0].shape) 
-            aug_imgs = augment_images(augs, batch[0])
+            logger.info(f"Augmenting {len(batch)} images")
+            aug_imgs = augment_images(augs, batch)
             # Run model
-            model_outputs = process_model(model, aug_imgs, settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT)
-            # Process model outputs
-            output_boxes, output_scores, output_classes = process_model_outputs(model_outputs)
+            for aug_img_batch in aug_imgs:
+                logger.info(f"Running model")
+                model_outputs = process_model(model, aug_img_batch, settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT)
+                # Process model outputs
+                logger.info(f"Processing outputs")
+                output_boxes, output_scores, output_classes = process_model_outputs(model_outputs)
 
-            results = []
-            for box,scores,label in zip(output_boxes, output_scores, output_classes):
-                image_result = {
-                           'category_id' : label_map[label],
-                            'scores'      : [scores],
-                            'bbox'        : str(box),
-                        }
-            
-                results.append(image_result)
-            batch_results.append(results)
+                results = []
+                for box,scores,label in zip(output_boxes, output_scores, output_classes):
+                    image_result = {
+                            'category_id' : label_map[label],
+                                'scores'      : [scores],
+                                'bbox'        : str(box),
+                            }
+                
+                    results.append(image_result)
+                batch_results.append(results)
                 # loop over the image IDs and their corresponding set of
                 # results from our model
             # loop over the image IDs and their corresponding set of
@@ -224,11 +245,8 @@ def classify_process():
                 # the image ID as the key so we can fetch the results
                 db.set(imageID, json.dumps(resultSet))
 
-            # remove the set of images from our queue
-            db.ltrim(settings.IMAGE_QUEUE, len(imageIDs), -1)
-
         # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP)
+        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01,0.1))
 
 # if this is the main thread of execution start the model server
 # process

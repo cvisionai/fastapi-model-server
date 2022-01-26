@@ -35,7 +35,7 @@ services:
   fast:
     image: fast:latest
     build: ./app/
-    container_name: "fast"
+    #container_name: "fast"
     networks:
       - backend
       - traefik-public
@@ -55,7 +55,7 @@ services:
     build:
       context: .
       dockerfile: ./modelserv/Dockerfile
-    container_name: "modelserv"
+    #container_name: "modelserv"
     networks:
       - backend
       - traefik-public
@@ -67,10 +67,6 @@ services:
       - ./app:/app/app
       - ./images:/images
       - ./script:/script
-
-
-
-
 
   redis:
     image: redis:6

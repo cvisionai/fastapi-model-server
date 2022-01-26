@@ -1,3 +1,6 @@
+# DEPRECATED. THIS IS FOR THE OLD VERSION AND LEFT FOR A REFERENCE OF HOW TO TEASE APART IN AN NGINX DEPLOYMENT
+
+
 # How to Run
 This app creteas a FastAPI application, which you can run using nginx, gunicorn, and uvicorn
 
