@@ -51,9 +51,9 @@ def prepare_image(image, target):
     image = np.array(image).astype('float32')
     # convert to BGR, because that's what the model expects
     image = image[:, :, ::-1].copy()
-    image[..., 0] -= 103.939
-    image[..., 1] -= 116.779
-    image[..., 2] -= 123.68
+    #image[..., 0] -= 103.939
+    #image[..., 1] -= 116.779
+    #image[..., 2] -= 123.68
     image = np.expand_dims(image, axis=0)
 
     # return the processed image
