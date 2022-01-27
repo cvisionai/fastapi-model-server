@@ -40,3 +40,4 @@ TODO
 - Configure TLS
 - Configure URLs
 - Configure ports
+- Add health checks. Consider https://pypi.org/project/fastapi-health/
