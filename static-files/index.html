@@ -152,18 +152,19 @@
     }
 
     .button[type="submit"][disabled] {
-        background: #B0B3B8;
-        color: gray;
-        cursor: not-allowed;
-      }
+      background: #B0B3B8;
+      color: gray;
+      cursor: not-allowed;
+    }
 
     .button[type="submit"][disabled]:hover {
-        background: #B0B3B8;
-        color: gray;
-      }
-      .button[type="submit"]:not([disabled]){
-        /* color:green; */
-      }
+      background: #B0B3B8;
+      color: gray;
+    }
+
+    .button[type="submit"]:not([disabled]) {
+      /* color:green; */
+    }
 
 
     :root {
@@ -4881,15 +4882,16 @@ body {
       Model Server <strong>Front End</strong>
     </h1>
   </div>
-  <div class="image-details" >
-    <div class="image-details__figure" >
+  <div class="image-details">
+    <div class="image-details__figure">
       <form id="msfe" class="">
         <div style="margin: 15px 0">
           <h2>Preview</h2>
           <p><i>Name: <span id="filename"></span></i></p>
           <p><i>File size: <span id="fileSize"></span></i></p>
           <p><i>File type: <span id="fileType"></span></i></p>
-          <img id="preview" style="background-color: #ccc; border: 1px solid black; min-height:200px; min-width: 500px; max-height: 500px;"/>
+          <img id="preview"
+            style="background-color: #ccc; border: 1px solid black; min-height:200px; min-width: 500px; max-height: 500px;" />
           <!-- <svg width="750" height="750" viewBox="0 0 750 750" id="draw" xmlns="http://www.w3.org/2000/svg">
               <rect id="marquee" x="450" y="420" width="150" height="150" />
               <g id="boxes"></g>
@@ -4911,7 +4913,7 @@ body {
                 </div>
                 <div class="v-input__append-inner">
                   <div class="v-input__icon v-input__icon--clear">
-                    <button disabled="disabled" type="button"                       aria-label="clear icon"
+                    <button disabled="disabled" type="button" aria-label="clear icon"
                       class="v-icon notranslate v-icon--disabled v-icon--link mdi mdi-close theme--light"></button>
                   </div>
                 </div>
@@ -4937,14 +4939,18 @@ body {
     <div class="image-details__meta-boxes">
       <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
         <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
-          <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results 
+          <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results
             <em data-v-601a8666="" id="success" class="text-meta"></em>
           </h3>
-          <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__close-icon"><use data-v-601a8666="" xlink:href="#icon-minus"></use></svg>
-            <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__open-icon"><use data-v-601a8666="" xlink:href="#icon-plus"></use></svg>
-          </summary>
-            <ul data-v-601a8666="" id="predictions"class="meta-box__list" style="max-height: unset;">
-              <!-- <li data-v-2eb4743a="" data-v-601a8666="" class="localizationBrief meta-box__list-item">
+          <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__close-icon">
+            <use data-v-601a8666="" xlink:href="#icon-minus"></use>
+          </svg>
+          <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__open-icon">
+            <use data-v-601a8666="" xlink:href="#icon-plus"></use>
+          </svg>
+        </summary>
+        <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
+          <!-- <li data-v-2eb4743a="" data-v-601a8666="" class="localizationBrief meta-box__list-item">
               <span data-v-2eb4743a="" class="body-1 meta-box__name">
                 TEST
                   <details data-v-2eb4743a="">
@@ -4954,10 +4960,10 @@ body {
               </span>
               </li> -->
         </ul>
-        </details>
-      </div>
+      </details>
+    </div>
 
-      <!-- <h2>Results</h2>
+    <!-- <h2>Results</h2>
       <div>
         <div id="success">Success: N/A</div>
         <h3>Predictions</h3>
@@ -4970,7 +4976,7 @@ body {
 
 
 
-<script type="text/javascript">
+  <script type="text/javascript">
 
 
     const form = document.getElementById("msfe");
@@ -5026,22 +5032,13 @@ body {
         submitButton.disabled = true;
         return { ok: false, message: "Error with file" };
       }
-
-<<<<<<< HEAD
     }
-=======
-      const postFile = () => {
-         var myHeaders = new Headers();
-         myHeaders.append("Accept", "*/*");
-         myHeaders.append("Connection", "keep-alive");
-         myHeaders.append("Host", "https://adamant.tator.io/");
->>>>>>> First path towards SSL and GPU configs
 
     const postFile = () => {
       var myHeaders = new Headers();
       myHeaders.append("Accept", "*/*");
       myHeaders.append("Connection", "keep-alive");
-      myHeaders.append("Host", "http://ocalhost/");
+      myHeaders.append("Host", "https://adamant.tator.io/");
 
       /* Do NOT send content-type */
       // myHeaders.append("Content-Type", 'multipart/form-data;boundary=""');
@@ -5066,25 +5063,7 @@ body {
       var formdata = new FormData();
       formdata.append("file", fileInput.files[0]);
 
-<<<<<<< HEAD
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: formdata,
-        redirect: 'follow'
-      };
-=======
-         fetch("https://adamant.tator.io:8082/predictor/", requestOptions)
-         .then(response => response.json())
-         .then(data => {
-           console.log(data);
-           return handleData(data);
-         })
-         .catch(error => console.log('error', error));
-      }
->>>>>>> First path towards SSL and GPU configs
-
-      fetch("http://localhost:8082/predictor/", requestOptions)
+      fetch("https://adamant.tator.io:8082/predictor/", myHeaders)
         .then(response => response.json())
         .then(data => {
           console.log(data);
@@ -5112,7 +5091,7 @@ body {
 
           let bbox = document.createElement("div");
           bbox.setAttribute("style", "padding-left: 20px; color: rgb(109, 108, 144);");
-   
+
           if (prediction.category_id !== null) {
             categoryId.textContent = `Category ID: ${prediction.category_id}`;
             details.appendChild(categoryId);
@@ -5147,105 +5126,6 @@ body {
     // Page listeners
     form.addEventListener("submit", validateAndSubmit);
     fileInput.addEventListener("change", validateAndPreview);
-
-
-    // const $ = document.querySelector.bind(document);
-
-    // /**
-    //  * Collection of rectangles defining user generated regions
-    //  */
-    // const rectangles = [];
-
-    // // DOM elements
-    // const $screenshot = $('#preview');
-    // const $draw = $('#draw');
-    // const $marquee = $('#marquee');
-    // const $boxes = $('#boxes');
-
-    // // Temp variables
-    // let startX = 0;
-    // let startY = 0;
-    // const marqueeRect = {
-    //   x: 0,
-    //   y: 0,
-    //   width: 0,
-    //   height: 0,
-    // };
-
-    // $marquee.classList.add('hide');
-    // $screenshot.addEventListener('pointerdown', startDrag);
-
-    // function startDrag(ev) {
-    //   // middle button delete rect
-    //   if (ev.button === 1) {
-    //     const rect = hitTest(ev.layerX, ev.layerY);
-    //     if (rect) {
-    //       rectangles.splice(rectangles.indexOf(rect), 1);
-    //       redraw();
-    //     }
-    //     return;
-    //   }
-    //   window.addEventListener('pointerup', stopDrag);
-    //   $screenshot.addEventListener('pointermove', moveDrag);
-    //   $marquee.classList.remove('hide');
-    //   startX = ev.layerX;
-    //   startY = ev.layerY;
-    //   drawRect($marquee, startX, startY, 0, 0);
-    // }
-
-    // function stopDrag(ev) {
-    //   $marquee.classList.add('hide');
-    //   window.removeEventListener('pointerup', stopDrag);
-    //   $screenshot.removeEventListener('pointermove', moveDrag);
-    //   if (ev.target === $screenshot && marqueeRect.width && marqueeRect.height) {
-    //     rectangles.push(Object.assign({}, marqueeRect));
-    //     redraw();
-    //   }
-    // }
-
-    // function moveDrag(ev) {
-    //   let x = ev.layerX;
-    //   let y = ev.layerY;
-    //   let width = startX - x;
-    //   let height = startY - y;
-    //   if (width < 0) {
-    //     width *= -1;
-    //     x -= width;
-    //   }
-    //   if (height < 0) {
-    //     height *= -1;
-    //     y -= height;
-    //   }
-    //   Object.assign(marqueeRect, { x, y, width, height });
-    //   drawRect($marquee, marqueeRect);
-    // }
-
-    // function hitTest(x, y) {
-    //   return rectangles.find(rect => (
-    //     x >= rect.x &&
-    //     y >= rect.y &&
-    //     x <= rect.x + rect.width &&
-    //     y <= rect.y + rect.height
-    //   ));
-    // }
-
-    // function redraw() {
-    //   boxes.innerHTML = '';
-    //   rectangles.forEach((data) => {
-    //     boxes.appendChild(drawRect(
-    //       document.createElementNS("http://www.w3.org/2000/svg", 'rect'), data
-    //     ));
-    //   });
-    // }
-
-    // function drawRect(rect, data) {
-    //   const { x, y, width, height } = data;
-    //   rect.setAttributeNS(null, 'width', width);
-    //   rect.setAttributeNS(null, 'height', height);
-    //   rect.setAttributeNS(null, 'x', x);
-    //   rect.setAttributeNS(null, 'y', y);
-    //   return rect;
-    // }
 
   </script>
 </body>
