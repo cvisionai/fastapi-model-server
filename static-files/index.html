@@ -5032,6 +5032,10 @@ body {
         submitButton.disabled = true;
         return { ok: false, message: "Error with file" };
       }
+<<<<<<< HEAD
+=======
+
+>>>>>>> https
     }
 
     const postFile = () => {
@@ -5063,7 +5067,18 @@ body {
       var formdata = new FormData();
       formdata.append("file", fileInput.files[0]);
 
+<<<<<<< HEAD
       fetch("https://adamant.tator.io:8082/predictor/", myHeaders)
+=======
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow'
+      };
+
+      fetch("https://adamant.tator.io:8082/predictor/", requestOptions)
+>>>>>>> https
         .then(response => response.json())
         .then(data => {
           console.log(data);
