@@ -291,7 +291,7 @@ body {
 
     /* @TODO Combine .text-meta ? */
     .text-meta {
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
     }
 
     .link-hit-area {
@@ -407,7 +407,7 @@ body {
 
     .code {
       background: var(--color-sea-salt-gray);
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
       border: 1px solid var(--color-salt-marsh-gray);
       padding: calc(15 * var(--font-size-basis)) calc(27 * var(--font-size-basis));
       border-radius: calc(8 * var(--font-size-basis));
@@ -444,7 +444,7 @@ body {
       line-height: var(--line-height-1);
       font-weight: var(--font-weight-bold);
 
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
       font-weight: normal;
 
     }
@@ -1464,7 +1464,7 @@ body {
     }
 
     .field--readonly {
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
     }
 
     .field:not(.field--has-container):focus-within,
@@ -1478,7 +1478,7 @@ body {
     }
 
     .field__input::placeholder {
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
     }
 
     .field__label {
@@ -1531,7 +1531,7 @@ body {
 
 
     .text-meta {
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
     }
 
     .meta-list,
@@ -1542,7 +1542,7 @@ body {
     }
 
     .meta-list {
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
       display: flex;
     }
 
@@ -1749,7 +1749,7 @@ body {
     .card__meta {
       margin-top: calc(4 * var(--font-size-basis));
       display: block;
-      color: var(--color-demersal-gray);
+      color: #6D6C90;
     }
 
     .collection-list,
@@ -4995,12 +4995,23 @@ body {
       }
     }
 
+    let conceptsSvg = document.createElement("svg");
+    conceptsSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    conceptsSvg.setAttribute("class", "concepts-figure__svg image-details__image");
+
     const preview = (file) => {
       if (file) {
         document.getElementById("filename").innerHTML = file.name;
         document.getElementById("fileSize").innerHTML = file.size;
         document.getElementById("fileType").innerHTML = file.type;
         previewImg.src = URL.createObjectURL(file);
+        let viewBox = { width: 0, height: 0 };
+        previewImg.onload = function () {
+          viewBox = { width: previewImg.naturalWidth, height: previewImg.naturalHeight }
+        }
+        conceptsSvg.setAttribute("viewBox", `0 0 ${viewBox.width} ${viewBox.height}`);
+
+
       } else {
         previewImg.src = "";
       }
@@ -5071,27 +5082,34 @@ body {
         predictionsEl.innerHTML = "";
         for (let prediction of data.predictions) {
           let predictionNode = document.createElement("li");
-          let categoryId = document.createElement("span");
-          let scores = document.createElement("span");
-          let bbox = document.createElement("span");
-          bbox.setAttribute("open", "true");
+          const details = document.createElement("details");
+          predictionNode.appendChild(details);
+
+          let categoryId = document.createElement("summary");
+          categoryId.setAttribute("style", "font-weight: 700");
+
+          let scores = document.createElement("div");
+          scores.setAttribute("style", "padding-left: 20px; color: rgb(109, 108, 144);");
+
+          let bbox = document.createElement("div");
+          bbox.setAttribute("style", "padding-left: 20px; color: rgb(109, 108, 144);");
    
           if (prediction.category_id !== null) {
             categoryId.textContent = `Category ID: ${prediction.category_id}`;
-            predictionNode.appendChild(categoryId);
+            details.appendChild(categoryId);
           }
 
           if (prediction.scores !== null) {
             scores.innerHTML = "Scores: <br/>"
             for (let score of prediction.scores) {
-              scores.innerHTML += `${score} <br/>`;
+              scores.innerHTML += `<div style="padding: 5px 25px">${score}<div>`;
             }
-            predictionNode.appendChild(scores);
+            details.appendChild(scores);
           }
 
           if (prediction.bbox !== null) {
-            bbox.textContent = `Bounding Box: ${prediction.bbox}`;
-            predictionNode.appendChild(bbox);
+            bbox.innerHTML = `Bounding Box: ${prediction.bbox}`;
+            details.appendChild(bbox);
           }
 
           predictionsEl.appendChild(predictionNode);
