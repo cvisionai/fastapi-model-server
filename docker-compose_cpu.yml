@@ -11,8 +11,6 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:8082"
-      - "--providers.file.directory=/configuration"
-      - "--providers.file.watch=true"
     ports:
       - "8082:8082"
       - "8080:8080"
@@ -21,7 +19,6 @@ services:
       - traefik-public
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/home/ben/traefik/configuration/:/configuration/"
 
   whoami:
     image: "containous/whoami"
@@ -34,6 +31,7 @@ services:
       - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
       - "traefik.http.routers.whoami.entrypoints=web"
 
+
   fast:
     image: fast:latest
     build: ./app/
@@ -43,9 +41,8 @@ services:
       - traefik-public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fast.rule=Host(`adamant.tator.io`)"
+      - "traefik.http.routers.fast.rule=Host(`localhost`)"
       - "traefik.http.routers.fast.entrypoints=web"
-      - "traefik.http.routers.fast.tls=true"
     volumes:
       - ./app:/app/app
       - ./images:/images
@@ -59,12 +56,6 @@ services:
       context: .
       dockerfile: ./modelserv/Dockerfile
     #container_name: "modelserv"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
-              device_ids: ['0']
     networks:
       - backend
       - traefik-public
@@ -99,7 +90,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
       - "traefik.port=6379"
-    entrypoint: redis-server --maxmemory 2048mb --maxmemory-policy allkeys-lru
+    entrypoint: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
 networks:
   traefik-public:
     external: true

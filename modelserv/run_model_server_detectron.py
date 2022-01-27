@@ -60,7 +60,7 @@ def load_model(args):
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/retinanet_R_50_FPN_3x.yaml"))
     cfg.merge_from_file(args.model_config_file)
     cfg.MODEL.RETINANET.SCORE_THRESH_TEST = args.score_threshold
-    cfg.MODEL.DEVICE = 'cpu'
+    #cfg.MODEL.DEVICE = 'cpu'
 
     cfg.MODEL.WEIGHTS = os.path.join(args.model_weights_file)  # path to the model we just trained
     model = build_model(cfg)  # returns a torch.nn.Module
@@ -74,14 +74,13 @@ def create_augmentations():
     '''
     aug1 = T.ResizeShortestEdge(
             [720, 720], 1280)
-    #aug2 = T.ResizeShortestEdge(
-    #        [540, 540], 960)
-    #aug3 = T.ResizeShortestEdge(
-    #        [1080, 1080], 1920)
+    aug2 = T.ResizeShortestEdge(
+            [540, 540], 960)
+    aug3 = T.ResizeShortestEdge(
+            [1080, 1080], 1920)
 
-    #return [aug1, aug2, aug3]
-    return [aug1]
-
+    return [aug1, aug2, aug3]
+    
 def augment_images(augs, image_batch):
     '''Generate augmented images based on list of input augmentations
     '''
@@ -246,7 +245,7 @@ def classify_process():
                 db.set(imageID, json.dumps(resultSet))
 
         # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01,0.1))
+        time.sleep(settings.SERVER_SLEEP + random.uniform(0.05,0.1))
 
 # if this is the main thread of execution start the model server
 # process
