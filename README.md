@@ -30,3 +30,13 @@ Stress test will probably want to run outside of a container, because it will on
 ```
 python3 stress_test.py
 ```
+
+TODO
+
+- Add box overlay capability
+- Add score thresholding
+- Configure CPU/GPU
+- Configure modelserver type
+- Configure TLS
+- Configure URLs
+- Configure ports
