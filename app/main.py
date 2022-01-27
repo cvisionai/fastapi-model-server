@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
 from PIL import Image
 import numpy as np
 import app.settings as settings
@@ -60,8 +61,8 @@ def prepare_image(image, target):
     return image
 
 @app.get("/")
-def homepage():
-    return "Welcome to the REST API!"
+async def homepage():
+    return FileResponse('/static-files/index.html')
 
 @app.post("/predictor/")
 def predict(file: UploadFile = File(...)):
