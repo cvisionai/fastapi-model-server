@@ -5016,7 +5016,15 @@ body {
         return { ok: false, message: "Error with file" };
       }
 
+<<<<<<< HEAD
     }
+=======
+      const postFile = () => {
+         var myHeaders = new Headers();
+         myHeaders.append("Accept", "*/*");
+         myHeaders.append("Connection", "keep-alive");
+         myHeaders.append("Host", "https://adamant.tator.io/");
+>>>>>>> First path towards SSL and GPU configs
 
     const postFile = () => {
       var myHeaders = new Headers();
@@ -5047,12 +5055,23 @@ body {
       var formdata = new FormData();
       formdata.append("file", fileInput.files[0]);
 
+<<<<<<< HEAD
       var requestOptions = {
         method: 'POST',
         headers: myHeaders,
         body: formdata,
         redirect: 'follow'
       };
+=======
+         fetch("https://adamant.tator.io:8082/predictor/", requestOptions)
+         .then(response => response.json())
+         .then(data => {
+           console.log(data);
+           return handleData(data);
+         })
+         .catch(error => console.log('error', error));
+      }
+>>>>>>> First path towards SSL and GPU configs
 
       fetch("http://localhost:8082/predictor/", requestOptions)
         .then(response => response.json())

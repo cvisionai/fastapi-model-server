@@ -29,7 +29,7 @@ IMAGE_PATH = "../images/00_01_13_13.png"
 # initialize the number of requests for the stress test along with
 # the sleep amount between requests
 NUM_REQUESTS = 50
-SLEEP_COUNT = 0.4
+SLEEP_COUNT = 0.05
 
 image = open(IMAGE_PATH, "rb").read()
 def call_predict_endpoint(n):
