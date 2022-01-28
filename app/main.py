@@ -62,9 +62,6 @@ def prepare_image(image, target):
     image = np.array(image).astype('float32')
     # convert to BGR, because that's what the model expects
     image = image[:, :, ::-1].copy()
-    #image[..., 0] -= 103.939
-    #image[..., 1] -= 116.779
-    #image[..., 2] -= 123.68
     image = np.expand_dims(image, axis=0)
 
     # return the processed image
@@ -86,9 +83,16 @@ def predict(file: UploadFile = File(...)):
     #image = Image.open(io.BytesIO(file.file))
     image = Image.open(file.file)
     width, height = image.size
+    # if the image mode is not RGB, convert it
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    image = np.array(image).astype('float32')
+    # convert to BGR, because that's what the model expects
+    image = image[:, :, ::-1].copy()
+    image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
-    image = prepare_image(image,
-        (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
+    #image = prepare_image(image,
+    #    (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")

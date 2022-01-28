@@ -196,7 +196,7 @@ def classify_process():
             img_height = q["height"]
             image = helpers.base64_decode_image(q["image"],
                 settings.IMAGE_DTYPE,
-                (1, settings.IMAGE_HEIGHT, settings.IMAGE_WIDTH,
+                (1, img_height, img_width,
                     settings.IMAGE_CHANS))
 
             # check to see if the batch list is None
