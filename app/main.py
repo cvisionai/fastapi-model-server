@@ -15,6 +15,16 @@ import uuid
 import time
 import json
 import io
+import logging
+
+logging.basicConfig(
+    handlers=[logging.StreamHandler()],
+    format="%(asctime)s %(levelname)s:%(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+    level=logging.INFO,
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -75,6 +85,8 @@ def predict(file: UploadFile = File(...)):
     #image = flask.request.files["image"].read()
     #image = Image.open(io.BytesIO(file.file))
     image = Image.open(file.file)
+    width, height = image.size
+    logger.info(f"Image original dimesions: {width}x{height}")
     image = prepare_image(image,
         (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
     # ensure our NumPy array is C-contiguous as well,
@@ -85,7 +97,7 @@ def predict(file: UploadFile = File(...)):
     # classification ID + image to the queue
     k = str(uuid.uuid4())
     image = helpers.base64_encode_image(image)
-    d = {"id": k, "image": image}
+    d = {"id": k, "image": image, "height": height, "width": width}
     db.rpush(settings.IMAGE_QUEUE, json.dumps(d))
     # keep looping until our model server returns the output
     # predictions

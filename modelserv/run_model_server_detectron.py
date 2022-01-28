@@ -192,6 +192,8 @@ def classify_process():
         for q in queue:
             # deserialize the object and obtain the input image
             q = json.loads(q.decode("utf-8"))
+            img_width = q["width"]
+            img_height = q["height"]
             image = helpers.base64_decode_image(q["image"],
                 settings.IMAGE_DTYPE,
                 (1, settings.IMAGE_HEIGHT, settings.IMAGE_WIDTH,
@@ -220,7 +222,7 @@ def classify_process():
             # Run model
             for aug_img_batch in aug_imgs:
                 logger.info(f"Running model")
-                model_outputs = process_model(model, aug_img_batch, settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT)
+                model_outputs = process_model(model, aug_img_batch, img_width, img_height)
                 # Process model outputs
                 logger.info(f"Processing outputs")
                 output_boxes, output_scores, output_classes = process_model_outputs(model_outputs)
