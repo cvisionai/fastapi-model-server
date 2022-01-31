@@ -48,7 +48,7 @@ class ModelServerFrontEnd {
       this._svgDiv.innerHTML = "";
       this._imagePane.hidden = true;
 
-      if (file) {  
+      if (file) {
          this._filename.innerHTML = file.name;
          this._filesize.innerHTML = file.size;
          this._filetype.innerHTML = file.type;
@@ -57,8 +57,8 @@ class ModelServerFrontEnd {
          this._previewImg.onload = (e) => {
             this._imagePane.hidden = false;
             console.log("New preview loaded.....")
-            this._scaleDiff = this._previewImg.width / this._previewImg.naturalWidth;
-            this._viewBox = { width: this._previewImg.width, height: this._previewImg.height };
+            // this._scaleDiff = this._previewImg.width / this._previewImg.naturalWidth;
+            this._viewBox = { width: this._previewImg.naturalWidth, height: this._previewImg.naturalHeight };
             // this._svgDiv.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
             // this._imagePane.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
          }
@@ -78,7 +78,7 @@ class ModelServerFrontEnd {
    }
 
    postFile = () => {
-      // FOR TESTING:: defined & return this.handleData(fakeData);
+      // FOR TESTING:: define & return this.handleData(fakeData);
       var myHeaders = new Headers();
       myHeaders.append("Accept", "*/*");
       myHeaders.append("Connection", "keep-alive");
@@ -93,16 +93,18 @@ class ModelServerFrontEnd {
          headers: myHeaders,
          body: formdata,
          redirect: 'follow'
-       };
- 
+      };
+
+      this._successEl.innerHTML = "Loading....";
       fetch("https://adamant.tator.io:8082/predictor/", requestOptions)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-          return this.handleData(data);
-        })
-        .catch(error => console.log('error', error));
+         .then(response => response.json())
+         .then(data => {
+            console.log(data);
+            return this.handleData(data);
+         })
+         .catch(error => console.error('Could not fetch predictions.', error));
    }
+
 
    handleResize = () => {
       if (this._data !== null) {
@@ -111,7 +113,7 @@ class ModelServerFrontEnd {
    }
 
    handleData = (data) => {
-      console.log(data);
+      // console.log(data);
       this._data = data;
       if (data.success !== null && data.success == true && data.predictions !== null) {
          this._successEl.innerHTML = data.predictions.length;
@@ -157,7 +159,7 @@ class ModelServerFrontEnd {
 
             let bbox = document.createElement("div");
             bbox.setAttribute("style", "padding-left: 20px; color: rgb(109, 108, 144);");
-           
+
 
             if (prediction.category_id !== null) {
                categoryId.textContent = `Category ID: ${prediction.category_id}`;
@@ -191,22 +193,23 @@ class ModelServerFrontEnd {
    }
 
    showBoundingBoxes(bbox, prediction) {
-      console.log(prediction);
-      // this._imagePane.setAttribute("style", `height: ${this._viewBox.height}; width: ${this._viewBox.width};`)
-      // this._imagePane.setAttribute("width", this._viewBox.width);
-      // this._imagePane.setAttribute("height", this._viewBox.height);
+      // console.log(prediction);
+      this._strokeWidth = Math.min(this._previewImg.naturalHeight, 1080) / 200;
+      this._fontSize = Math.min(this._previewImg.naturalHeight, 1080) / 333 * 12;
+      const strokeWidth = this._strokeWidth;
       const boundingBox = JSON.parse(prediction.bbox);
-      const bounding_x1 = Number(boundingBox[0]) * this._scaleDiff;
-      const bounding_y1 = Number(boundingBox[1]) * this._scaleDiff;
-      const bounding_x2 = Number(boundingBox[2]) * this._scaleDiff;
-      const bounding_y2 = Number(boundingBox[3]) * this._scaleDiff;
+      const bounding_x1 = Number(boundingBox[0]) + (strokeWidth / 2);
+      const bounding_y1 = Number(boundingBox[1]) + (2 * strokeWidth);
+      const bounding_x2 = Number(boundingBox[2]) + (strokeWidth / 2);
+      const bounding_y2 = Number(boundingBox[3]) + (2 * strokeWidth);
+      const transformPoints =
 
-      bbox.innerHTML = `<strong class='text-meta'>Bounding Boxes:</strong><br/><div class="label-1>`;
-      bbox.innerHTML += ` &nbsp; <strong>x1</strong>: ${bounding_x1}<br/>`;
-      bbox.innerHTML += ` &nbsp; <strong>y1</strong>: ${bounding_y1}<br/>`;
-      bbox.innerHTML += ` &nbsp; <strong>x2</strong>: ${bounding_x2}<br/>`;
-      bbox.innerHTML += ` &nbsp; <strong>y2</strong>: ${bounding_y2}</div>`;
-      
+         bbox.innerHTML = `<strong class='text-meta'>Bounding Boxes:</strong><br/><div class="label-1>`;
+      bbox.innerHTML += ` &nbsp; <strong>x1</strong>: ${boundingBox[0]}<br/>`;
+      bbox.innerHTML += ` &nbsp; <strong>y1</strong>: ${boundingBox[1]}<br/>`;
+      bbox.innerHTML += ` &nbsp; <strong>x2</strong>: ${boundingBox[2]}<br/>`;
+      bbox.innerHTML += ` &nbsp; <strong>y2</strong>: ${boundingBox[3]}</div>`;
+
 
       const bounding_width = bounding_x2 - bounding_x1;
       const bounding_height = bounding_y2 - bounding_y1;
@@ -219,10 +222,10 @@ class ModelServerFrontEnd {
 
       const box_G = document.createElement("g");
       box_G.setAttribute("id", `${String(prediction.category_id).replace(" ", "-")}__${bounding_x1}__${bounding_x1}`);
-      box_G.setAttribute("style", `color: ${colorString}; transform: translate(${Math.floor(bounding_x1)}px, ${Math.floor(bounding_y1)}px); stroke: ${colorString}; stroke-width: 2px;`);
+      box_G.setAttribute("style", `color: ${colorString}; stroke: ${colorString}; stroke-width: ${strokeWidth}px;`);
       box_G.setAttribute("x", `${bounding_x1}`);
       box_G.setAttribute("y", `${bounding_y1}`);
-      box_G.setAttribute("transform", `translate(${Math.floor(bounding_x1)}, ${Math.floor(bounding_y1)})`);
+      box_G.setAttribute("transform", `translate(${bounding_x1}, ${bounding_y1})`);
       box_G.setAttribute("class", `concepts-figure__svg-group`);
       box_G.setAttribute("active", `true`);
       box_G.setAttribute("ref", `group`);
@@ -231,12 +234,12 @@ class ModelServerFrontEnd {
 
       const concept_Text = document.createElement("text");
       // concept_Text.setAttribute("data-v-601a8666", "");
-      concept_Text.setAttribute("style", `fill: ${colorString}; transform: translateY(1.25em); font-size: 18px;`)
+      concept_Text.setAttribute("style", `fill: ${colorString}; transform: translateY(1.25em); font-size: ${this._fontSize}px;`)
       concept_Text.setAttribute("stroke", `none`);
       concept_Text.setAttribute("fill", colorString);
-      let labelX = this.labelXPosition(this._viewBox.height, this._viewBox.width, prediction.category_id.length, bounding_width, bounding_x1);
+      let labelX = this.labelXPosition(prediction.category_id.length, bounding_width, bounding_x1);
       concept_Text.setAttribute("x", labelX);
-      let labelY = this.labelYPosition(this._viewBox.height, this._viewBox.width, prediction.category_id.length, bounding_height, bounding_y1);
+      let labelY = this.labelYPosition(bounding_height, bounding_y1);
       concept_Text.setAttribute("y", labelY);
       concept_Text.setAttribute("class", `concepts-figure__svg-text`);
       concept_Text.innerText = prediction.category_id;
@@ -246,7 +249,7 @@ class ModelServerFrontEnd {
       const box_path = document.createElement("path");
       // box_path.setAttribute("data-v-601a8666", "");
       box_path.setAttribute("stroke", colorString);
-      box_path.setAttribute("stroke-width", "2px");
+      box_path.setAttribute("stroke-width", `${strokeWidth}px`);
       box_path.setAttribute("fill", "transparent");
       box_path.setAttribute("class", "concepts-figure__svg-shape");
       box_path.setAttribute("d", `m 0 0
@@ -257,12 +260,12 @@ class ModelServerFrontEnd {
       box_G.appendChild(box_path);
    }
 
-   labelXPosition = (viewBoxHeight, viewBoxWidth, conceptLength, bounding_width, bounding_x) => {
-      let labelHeight = (viewBoxHeight / 333) * 18; // font size calculation
+   labelXPosition = (conceptLength, bounding_width, bounding_x) => {
+      let labelHeight = this._fontSize; // font size calculation
       // let conceptLength = this.conceptName.length; //- (this.boundingBox.width/2)
       let conceptLengthSM = conceptLength * (labelHeight / 4);
       let conceptLengthLG = conceptLengthSM + (bounding_width);
-      let space = (viewBoxWidth - bounding_x);
+      let space = (this._previewImg.width - bounding_x);
 
       if (conceptLengthLG >= space) {
          return Math.floor(-(conceptLengthSM)); //-conceptLength
@@ -271,16 +274,15 @@ class ModelServerFrontEnd {
       }
    }
 
-   labelYPosition = (viewBoxHeight, viewBoxWidth, conceptLength, bounding_height, bounding_y) => {
-      let labelHeight = (viewBoxHeight / 333) * 18; // font size calculation
-      let strokeWidth = (viewBoxHeight / 200); // stroke width calculation
+   labelYPosition = (bounding_height, bounding_y) => {
+      let labelHeight = this._fontSize; // font size calculation
       let actualHeightNeeded = labelHeight + bounding_height;
-      let needsMoreSpace = (bounding_y + actualHeightNeeded) > viewBoxHeight;
+      let needsMoreSpace = (bounding_y + actualHeightNeeded) > this._previewImg.height;
 
       if (needsMoreSpace) {
-         return Math.floor(-(labelHeight + (strokeWidth * 4)));
+         return Math.floor(-(labelHeight + (this._strokeWidth * 4)));
       } else {
-         return Math.floor(0 + (bounding_height - (strokeWidth * 4)));
+         return Math.floor(0 + (bounding_height - (this._strokeWidth * 4)));
       }
    }
 

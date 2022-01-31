@@ -17,55 +17,56 @@
     </h1>
   </div>
   <main class="image-details" style="background-color: white; ">
-    <figure id="image_pane" class="image-details__figure" hidden>
-      <div class="">
+    <figure  class="image-details__figure" >
+      <div id="image_pane" class="" hidden>
         <span class="concepts-figure">
           <img id="preview" class="concepts-figure__image image-details__image"
             style="background-color: #ccc; border: 1px solid black;" />
           <span id="svgDiv" style="width: 100%; height: 100%" class="concepts-figure__svg image-details__image"></span>
         </span>
       </div>
-    </figure>
-    <form id="msfe" class="image-details__form">
-      <div style="margin: 15px 0">
-        <h2 class="h3">Image Details</h2>
-        <p><i>Name: <span id="filename"></span></i></p>
-        <p><i>File size: <span id="fileSize"></span></i></p>
-        <p><i>File type: <span id="fileType"></span></i></p>
-      </div>
-
-      <label label for="file_upload" style="margin: 15px 0">
-        <!-- <span hidden>File Upload:</span> -->
-        <div data-v-4cda37d0="" class="v-input theme--light v-text-field v-text-field--is-booted v-file-input">
-          <div class="v-input__prepend-outer">
-            <div class="v-input__icon v-input__icon--prepend"><button type="button" aria-label="prepend icon"
-                class="v-icon notranslate v-icon--link mdi mdi-paperclip theme--light"></button></div>
-          </div>
-          <div class="v-input__control">
-            <div class="v-input__slot">
-              <div class="v-text-field__slot">
-                <!-- <label for="file_upload" class="v-label theme--light" style="left: 0px; right: auto; position: absolute;">File input</label> -->
-                <div id="fileUploadText" class="v-file-input__text">Choose File to Preview</div>
-                <input id="file_upload" type="file">
+      <form id="msfe" class="image-details__form">
+        <div style="margin: 15px 0">
+          <h2 class="h3">Image Details</h2>
+          <p><i>Name: <span id="filename"></span></i></p>
+          <p><i>File size: <span id="fileSize"></span></i></p>
+          <p><i>File type: <span id="fileType"></span></i></p>
+        </div>
+  
+        <label label for="file_upload" style="margin: 15px 0">
+          <!-- <span hidden>File Upload:</span> -->
+          <div data-v-4cda37d0="" class="v-input theme--light v-text-field v-text-field--is-booted v-file-input">
+            <div class="v-input__prepend-outer">
+              <div class="v-input__icon v-input__icon--prepend"><button type="button" aria-label="prepend icon"
+                  class="v-icon notranslate v-icon--link mdi mdi-paperclip theme--light"></button></div>
+            </div>
+            <div class="v-input__control">
+              <div class="v-input__slot">
+                <div class="v-text-field__slot">
+                  <!-- <label for="file_upload" class="v-label theme--light" style="left: 0px; right: auto; position: absolute;">File input</label> -->
+                  <div id="fileUploadText" class="v-file-input__text">Choose File to Preview</div>
+                  <input id="file_upload" type="file">
+                </div>
+                <div class="v-input__append-inner">
+                  <div class="v-input__icon v-input__icon--clear">
+                    <button disabled="disabled" type="button" aria-label="clear icon"
+                      class="v-icon notranslate v-icon--disabled v-icon--link mdi mdi-close theme--light"></button>
+                  </div>
+                </div>
               </div>
-              <div class="v-input__append-inner">
-                <div class="v-input__icon v-input__icon--clear">
-                  <button disabled="disabled" type="button" aria-label="clear icon"
-                    class="v-icon notranslate v-icon--disabled v-icon--link mdi mdi-close theme--light"></button>
+              <div class="v-text-field__details">
+                <div class="v-messages theme--light">
+                  <div class="v-messages__wrapper"></div>
                 </div>
               </div>
             </div>
-            <div class="v-text-field__details">
-              <div class="v-messages theme--light">
-                <div class="v-messages__wrapper"></div>
-              </div>
-            </div>
           </div>
-        </div>
-      </label>
-      <div id="hiddenError" style="color: red;" hidden></div>
-      <input type="submit" class="button" id="submit" value="Run Algorithm" style="margin: 15px 0" disabled>
-    </form>
+        </label>
+        <div id="hiddenError" style="color: red;" hidden></div>
+        <input type="submit" class="button" id="submit" value="Run Algorithm" style="margin: 15px 0" disabled>
+      </form>
+    </figure>
+    
     <div class="image-details__meta-boxes">
       <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
         <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
