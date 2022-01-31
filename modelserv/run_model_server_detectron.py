@@ -167,7 +167,7 @@ def classify_process():
     args = {}
     args['model_config_file'] = 'fathomnet_config_v2_1280.yaml'
     args['model_weights_file'] = 'model_final.pth'
-    args['score_threshold'] = 0.4
+    args['score_threshold'] = 0.2
     args = DictToDotNotation(args)
 
     logger.info("Loading model...")
