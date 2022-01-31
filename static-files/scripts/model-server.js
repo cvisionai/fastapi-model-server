@@ -202,9 +202,8 @@ class ModelServerFrontEnd {
       const bounding_y1 = Number(boundingBox[1]) + (2 * strokeWidth);
       const bounding_x2 = Number(boundingBox[2]) + (strokeWidth / 2);
       const bounding_y2 = Number(boundingBox[3]) + (2 * strokeWidth);
-      const transformPoints =
 
-         bbox.innerHTML = `<strong class='text-meta'>Bounding Boxes:</strong><br/><div class="label-1>`;
+      bbox.innerHTML = `<strong class='text-meta'>Bounding Boxes:</strong><br/><div class="label-1>`;
       bbox.innerHTML += ` &nbsp; <strong>x1</strong>: ${boundingBox[0]}<br/>`;
       bbox.innerHTML += ` &nbsp; <strong>y1</strong>: ${boundingBox[1]}<br/>`;
       bbox.innerHTML += ` &nbsp; <strong>x2</strong>: ${boundingBox[2]}<br/>`;
