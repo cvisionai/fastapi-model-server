@@ -232,7 +232,7 @@ def classify_process():
                     image_result = {
                             'category_id' : label_map[label],
                                 'scores'      : [scores],
-                                'bbox'        : str(box),
+                                'bbox'        : box,
                             }
                 
                     results.append(image_result)
