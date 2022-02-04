@@ -82,7 +82,7 @@ class ModelServerFrontEnd {
       var myHeaders = new Headers();
       myHeaders.append("Accept", "*/*");
       myHeaders.append("Connection", "keep-alive");
-      myHeaders.append("Host", "https://adamant.tator.io/");
+      myHeaders.append("Host", "https://adamant.tator.io:8082/");
       /* NOTE: Do NOT send content-type */ // myHeaders.append("Content-Type", 'multipart/form-data;boundary=""');
 
       var formdata = new FormData();
@@ -197,7 +197,7 @@ class ModelServerFrontEnd {
       this._strokeWidth = Math.min(this._previewImg.naturalHeight, 1080) / 200;
       this._fontSize = Math.min(this._previewImg.naturalHeight, 1080) / 333 * 12;
       const strokeWidth = this._strokeWidth;
-      const boundingBox = JSON.parse(prediction.bbox);
+      const boundingBox = Array.isArray(prediction.bbox) ? prediction.bbox : JSON.parse(prediction.bbox);
       const bounding_x1 = Number(boundingBox[0]) + (strokeWidth / 2);
       const bounding_y1 = Number(boundingBox[1]) + (2 * strokeWidth);
       const bounding_x2 = Number(boundingBox[2]) + (strokeWidth / 2);
