@@ -1,7 +1,7 @@
 class ModelServerFrontEnd {
    constructor({ form, submitButton, fileInput, hiddenError, previewImg,
       fileUploadText, imagePane, svgDiv, successEl, predictionsEl,
-      filename, filesize, filetype }) {
+      filename, filesize, filetype, downloadResults }) {
       this._svgDiv = svgDiv;
       this._currentSvg = null;
       this._scaleDiff = 0;
@@ -20,7 +20,9 @@ class ModelServerFrontEnd {
       this._filename = filename;
       this._filetype = filetype;
       this._filesize = filesize;
+      this._downloadResults = downloadResults;
 
+      this._downloadResults.addEventListener("click", this.downloadObjectAsJson.bind(this));
    }
 
    validateAndSubmit = (e) => {
@@ -78,7 +80,7 @@ class ModelServerFrontEnd {
    }
 
    postFile = () => {
-      // FOR TESTING:: define & return this.handleData(fakeData);
+      // FOR TESTING:: define &   return this.handleData(fakeData);
       var myHeaders = new Headers();
       myHeaders.append("Accept", "*/*");
       myHeaders.append("Connection", "keep-alive");
@@ -117,12 +119,11 @@ class ModelServerFrontEnd {
       this._data = data;
       if (data.success !== null && data.success == true && data.predictions !== null) {
          this._successEl.innerHTML = data.predictions.length;
-         // this._filename.innerHTML = "";
-         // this._filesize.innerHTML = "";
-         // this._filetype.innerHTML = "";
+         this._downloadResults.hidden = false;
       } else {
          this._successEl.innerHTML = "Error";
          this._data = null;
+         this._downloadResults.hidden = true;
       }
       if (data.predictions !== null) {
          this._predictionsEl.innerHTML = "";
@@ -189,6 +190,7 @@ class ModelServerFrontEnd {
          this._svgDiv.innerHTML = this._currentSvg.outerHTML;
       } else {
          this._predictionsEl.innerHTML = "N/A";
+         this._downloadResults.hidden = true;
       }
    }
 
@@ -290,4 +292,19 @@ class ModelServerFrontEnd {
       this.validateFile(file);
       this.preview(file);
    }
+
+   downloadObjectAsJson() {
+      const exportObj = this._data;
+      let date = new Date().toISOString();
+      const exportName = `Results__${String(this._filename.innerText).split(".")[0]}__${date}`
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+      const downloadAnchorNode = document.createElement('a');
+
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", exportName + ".json");
+      document.body.appendChild(downloadAnchorNode); // required for firefox
+      
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }
 }

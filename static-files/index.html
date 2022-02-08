@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <title>Model Server Front End</title>
   <link href="/static/styles.css" rel="stylesheet">
+  <!-- <link href="styles.css" rel="stylesheet"> -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
@@ -79,13 +80,18 @@
           <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__open-icon">
             <use data-v-601a8666="" xlink:href="#icon-plus"></use>
           </svg>
+
         </summary>
         <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
         </ul>
+        <div >
+          <button id="downloadResults" hidden class="button">Download results</button>
+        </div>
       </details>
     </div>
   </main>
   <script src="/static/scripts/model-server.js"></script>
+  <!-- <script src="scripts/model-server.js"></script> -->
   <script type="text/javascript">
     const pageElements = {
       form: document.getElementById("msfe"),
@@ -100,7 +106,8 @@
       predictionsEl : document.getElementById("predictions"),
       filename: document.getElementById("filename"),
       filesize: document.getElementById("fileSize"),
-      filetype: document.getElementById("fileType")
+      filetype: document.getElementById("fileType"),
+      downloadResults: document.getElementById("downloadResults")
     }    
 
     // Page listeners
