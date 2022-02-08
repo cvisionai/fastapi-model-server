@@ -49,6 +49,7 @@ class ModelServerFrontEnd {
       this._filetype.innerHTML = "";
       this._svgDiv.innerHTML = "";
       this._imagePane.hidden = true;
+      this._downloadResults.hidden = true;
 
       if (file) {
          this._filename.innerHTML = file.name;
