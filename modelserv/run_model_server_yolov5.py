@@ -47,6 +47,7 @@ def load_model(args):
     '''
     model = torch.hub.load('ultralytics/yolov5','custom',path=args.model_weights_file)
     model.conf = args.score_threshold
+    model.agnostic = True
 
     return model
 
@@ -91,7 +92,7 @@ def process_model_outputs(model_outputs):
     
     results = model_outputs.pred[0].cpu().numpy()
     output_boxes = [[float(arr[0]),float(arr[1]),float(arr[2]),float(arr[3])] for arr in results]
-    output_scores = [[float(arr[4])] for arr in results]
+    output_scores = [float(arr[4]) for arr in results]
     output_classes = [int(arr[5]) for arr in results]
 
     return output_boxes, output_scores, output_classes
