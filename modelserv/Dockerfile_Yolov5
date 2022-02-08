@@ -1,0 +1,17 @@
+FROM cvisionai/openem_lite:latest
+RUN apt update
+RUN pip3 install redis
+RUN pip3 install torch torchvision torchaudio
+# WARNING: You will need to clone yolov5 repo and change path accordingly
+COPY ./yolov5 /yolov5
+WORKDIR "/yolov5"
+RUN pip3 install -r requirements.txt
+COPY ./modelserv/run_model_server_yolov5.py /scripts/run_model_server_yolov5.py
+COPY ./app/settings.py /scripts/settings.py
+COPY ./app/helpers.py /scripts/helpers.py
+COPY ./mbari-mb-benthic-33k.pt /scripts/mbari-mb-benthic-33k.pt
+COPY ./fathomnet_config_v2_1280.yaml /scripts/fathomnet_config_v2_1280.yaml
+
+WORKDIR /scripts
+
+CMD [ "python3", "run_model_server_yolov5.py" ]
