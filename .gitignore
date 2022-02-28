@@ -1,3 +1,4 @@
 app/__pycache__/
 *.pth
 yolov5/
+.DS_Store

@@ -4,117 +4,156 @@
 <head>
   <meta charset="utf-8">
   <title>Model Server Front End</title>
-  <link href="/static/styles.css" rel="stylesheet">
-  <!-- <link href="styles.css" rel="stylesheet"> -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <!-- <link href="/static/styles.css" rel="stylesheet"> -->
+  <link href="styles.css?v=1.000" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet"> -->
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
 
 <body class="" style="background-color: white; ">
-  <div class="top_bar home-page__section--dark-mode">
-    <h1 class="heading-1 home-page__heading home-page__search-heading">
-      Model Server <strong>Front End</strong>
-    </h1>
-  </div>
-  <main class="image-details" style="background-color: white; ">
-    <figure  class="image-details__figure" >
-      <div id="image_pane" class="" hidden>
-        <span class="concepts-figure">
-          <img id="preview" class="concepts-figure__image image-details__image"
-            style="background-color: #ccc; border: 1px solid black;" />
-          <span id="svgDiv" style="width: 100%; height: 100%" class="concepts-figure__svg image-details__image"></span>
-        </span>
+  <div id="app">
+    <v-app>
+      <div class="top_bar home-page__section--dark-mode">
+        <h1 class="heading-1 home-page__heading home-page__search-heading">
+          Model Server <strong>Front End</strong>
+        </h1>
       </div>
-      <form id="msfe" class="image-details__form">
-        <div style="margin: 15px 0">
-          <h2 class="h3">Image Details</h2>
-          <p><i>Name: <span id="filename"></span></i></p>
-          <p><i>File size: <span id="fileSize"></span></i></p>
-          <p><i>File type: <span id="fileType"></span></i></p>
-        </div>
-  
-        <label label for="file_upload" style="margin: 15px 0">
-          <!-- <span hidden>File Upload:</span> -->
-          <div data-v-4cda37d0="" class="v-input theme--light v-text-field v-text-field--is-booted v-file-input">
-            <div class="v-input__prepend-outer">
-              <div class="v-input__icon v-input__icon--prepend"><button type="button" aria-label="prepend icon"
-                  class="v-icon notranslate v-icon--link mdi mdi-paperclip theme--light"></button></div>
-            </div>
-            <div class="v-input__control">
-              <div class="v-input__slot">
-                <div class="v-text-field__slot">
-                  <!-- <label for="file_upload" class="v-label theme--light" style="left: 0px; right: auto; position: absolute;">File input</label> -->
-                  <div id="fileUploadText" class="v-file-input__text">Choose File to Preview</div>
-                  <input id="file_upload" type="file">
-                </div>
-                <div class="v-input__append-inner">
-                  <div class="v-input__icon v-input__icon--clear">
-                    <button disabled="disabled" type="button" aria-label="clear icon"
-                      class="v-icon notranslate v-icon--disabled v-icon--link mdi mdi-close theme--light"></button>
-                  </div>
-                </div>
-              </div>
-              <div class="v-text-field__details">
-                <div class="v-messages theme--light">
-                  <div class="v-messages__wrapper"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </label>
-        <div id="hiddenError" style="color: red;" hidden></div>
-        <input type="submit" class="button" id="submit" value="Run Algorithm" style="margin: 15px 0" disabled>
-      </form>
-    </figure>
-    
-    <div class="image-details__meta-boxes">
-      <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
-        <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
-          <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results
-            <em data-v-601a8666="" id="success" class="text-meta"></em>
-          </h3>
-          <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__close-icon">
-            <use data-v-601a8666="" xlink:href="#icon-minus"></use>
-          </svg>
-          <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__open-icon">
-            <use data-v-601a8666="" xlink:href="#icon-plus"></use>
-          </svg>
+      <main class="image-details" style="background-color: white; ">
 
-        </summary>
-        <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
-        </ul>
-        <div >
-          <button id="downloadResults" hidden class="button">Download results</button>
+        <figure class="image-details__figure">
+          <div class="d-flex justify-space-between align-center">
+            <button id="uploadFile">
+              <i class="">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
+                </svg>
+              </i>
+              <span class="text-h5"> Upload file</span>
+            </button>
+            <button id="clearImage" hidden>
+              <i>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
+              </i>
+              <span class="text-h5"> Clear Image</span>
+            </button>
+          </div>
+          <div id="image_pane" class="" hidden>
+            <span class="concepts-figure">
+              <!-- <div id="preview"></div> -->
+              <img id="preview" class="concepts-figure__image image-details__image"
+                style="background-color: #ccc; border: 1px solid black;" />
+              <span id="svgDiv" style="width: 100%; height: 100%"
+                class="concepts-figure__svg image-details__image"></span>
+            </span>
+          </div>
+          <form id="msfe" class="image-details__form">
+            <div style="margin: 15px 0">
+              <!-- <h2 class="h3">Image Details</h2> -->
+              <p><i>Name: <span id="filename"></span></i></p>
+              <p><i>File size: <span id="fileSize"></span></i></p>
+              <p><i>File type: <span id="fileType"></span></i></p>
+            </div>
+
+            <label label for="file_upload" style="margin: 15px 0">
+              <!-- <span hidden>File Upload:</span> -->
+              <div class="">
+                <!-- <label for="file_upload" class="v-label theme--light" style="left: 0px; right: auto; position: absolute;">File input</label> -->
+                <!-- <div id="fileUploadText" class="v-file-input__text">Choose File to Preview</div> -->
+                <input id="file_upload" type="file">
+              </div>
+            </label>
+            <!-- <div id="hiddenError" style="color: red;" hidden></div>
+        <input type="submit" class="button" id="submit" value="Run Algorithm" style="margin: 15px 0" disabled> -->
+          </form>
+        </figure>
+
+        <div class="image-details__meta-boxes">
+          <div class="d-flex justify-space-between">
+            <input id="runAlgoButton" type="submit" class="button" value="Run Algorithm"
+              title="Analyze an image or video frame" style="margin: 15px 0" disabled>
+              <button id="downloadResults" hidden class="">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download results
+              </button>
+          </div>
+          <details data-v-601a8666="" id="localizationBriefs" open="open" class="meta-box image-details__meta-box">
+            <summary data-v-601a8666="" class="meta-box__summary" style="display:block;">
+              <div class="d-flex justify-space-between">
+              <h3 data-v-601a8666="" id="bounding_box_count" class="meta-box__heading">Results
+                <em data-v-601a8666="" id="success" class="text-meta"></em>
+              </h3>
+              
+
+              </div>
+              <!-- <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__close-icon">
+                <use data-v-601a8666="" xlink:href="#icon-minus"></use>
+              </svg>
+              <svg data-v-601a8666="" width="24" height="24" class="icon icon--large meta-box__open-icon">
+                <use data-v-601a8666="" xlink:href="#icon-plus"></use>
+              </svg> -->
+
+            </summary>
+            <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
+            </ul>
+            <div id="hiddenError" style="color: red;" hidden></div>
+
+
+          </details>
         </div>
-      </details>
-    </div>
-  </main>
-  <script src="/static/scripts/model-server.js"></script>
-  <!-- <script src="scripts/model-server.js"></script> -->
+      </main>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+    })
+  </script>
+  <!-- <script src="/static/scripts/model-server.js"></script> -->
+  <script src="scripts/model-server.js?v=1.000"></script>
   <script type="text/javascript">
     const pageElements = {
       form: document.getElementById("msfe"),
-      submitButton : document.getElementById("submit"),
-      fileInput : document.getElementById("file_upload"),
-      hiddenError : document.getElementById("hiddenError"),
-      previewImg : document.getElementById("preview"),
-      fileUploadText : document.getElementById("fileUploadText"),
-      imagePane : document.getElementById("image_pane"),
-      svgDiv : document.getElementById("svgDiv"),
-      successEl : document.getElementById("success"),
-      predictionsEl : document.getElementById("predictions"),
+      submitButton: document.getElementById("runAlgoButton"),
+      fileInput: document.getElementById("file_upload"),
+      hiddenError: document.getElementById("hiddenError"),
+      previewImg: document.getElementById("preview"),
+      // fileUploadText: document.getElementById("fileUploadText"),
+      imagePane: document.getElementById("image_pane"),
+      svgDiv: document.getElementById("svgDiv"),
+      successEl: document.getElementById("success"),
+      predictionsEl: document.getElementById("predictions"),
       filename: document.getElementById("filename"),
       filesize: document.getElementById("fileSize"),
       filetype: document.getElementById("fileType"),
-      downloadResults: document.getElementById("downloadResults")
-    }    
+      downloadResults: document.getElementById("downloadResults"),
+      uploadHeading: document.getElementById("uploadFile"),
+      clearImage: document.getElementById("clearImage")
+    }
 
     // Page listeners
     const msfe = new ModelServerFrontEnd(pageElements);
-    document.getElementById("msfe").addEventListener("submit", msfe.validateAndSubmit.bind(this));
-    document.getElementById("file_upload").addEventListener("change", msfe.validateAndPreview.bind(this));
+    document.getElementById("runAlgoButton").addEventListener("click", msfe.validateAndSubmit.bind(this));
+    pageElements.fileInput.addEventListener("change", msfe.validateAndPreview.bind(this));
+    
+    // trigger file box from heading too
+    pageElements.uploadHeading.addEventListener("click", (e) => {
+      pageElements.fileInput.click();
+    });
 
+    // clear the preview & reset if clear image is selected
+    pageElements.clearImage.addEventListener("click", () => {
+      pageElements.fileInput.value = "";
+      msfe.preview(null)
+    });
   </script>
 </body>
 
