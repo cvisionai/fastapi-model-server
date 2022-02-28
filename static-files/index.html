@@ -4,9 +4,8 @@
 <head>
   <meta charset="utf-8">
   <title>Model Server Front End</title>
-  <!-- <link href="/static/styles.css" rel="stylesheet"> -->
-  <link href="styles.css?v=1.000" rel="stylesheet">
-  <!-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet"> -->
+  <link href="/static/styles.css?v=1.000" rel="stylesheet">
+  <!-- <link href="styles.css" rel="stylesheet"> -->
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
@@ -20,7 +19,6 @@
         </h1>
       </div>
       <main class="image-details" style="background-color: white; ">
-
         <figure class="image-details__figure">
           <div class="d-flex justify-space-between align-center">
             <button id="uploadFile">
@@ -40,8 +38,25 @@
                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                 </svg>
               </i>
-              <span class="text-h5"> Clear Image</span>
+              <span class="text-h5"> Clear</span>
             </button>
+            <button id="grabSnapshot" hidden>
+              <i class="">
+                <svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+              </svg>
+              </i>
+              <span class="text-h5"> Grab Snapshot</span>
+            </button>
+            <button id="backToVideo" hidden>
+              <i class="">
+                
+              </i>
+              <span class="text-h5"> Back to Video</span>
+            </button>
+          </div>
+          <div>
+            <div id="hiddenError" style="color: red;"></div>
           </div>
           <div id="image_pane" class="" hidden>
             <span class="concepts-figure">
@@ -51,6 +66,12 @@
               <span id="svgDiv" style="width: 100%; height: 100%"
                 class="concepts-figure__svg image-details__image"></span>
             </span>
+          </div>
+          <div id="video_pane" class="" hidden>
+            <video id="htmlVideoTag" controls autoplay>
+              <p>Your browser doesn't support HTML5 video.</p>
+            </video>
+            <canvas id="hiddenCanvas" hidden></canvas>
           </div>
           <form id="msfe" class="image-details__form">
             <div style="margin: 15px 0">
@@ -100,7 +121,7 @@
             </summary>
             <ul data-v-601a8666="" id="predictions" class="meta-box__list" style="max-height: unset;">
             </ul>
-            <div id="hiddenError" style="color: red;" hidden></div>
+            
 
 
           </details>
@@ -117,8 +138,8 @@
       vuetify: new Vuetify(),
     })
   </script>
-  <!-- <script src="/static/scripts/model-server.js"></script> -->
-  <script src="scripts/model-server.js?v=1.000"></script>
+  <script src="/static/scripts/model-server.js?v=1.000"></script>
+  <!-- <script src="scripts/model-server.js"></script> -->
   <script type="text/javascript">
     const pageElements = {
       form: document.getElementById("msfe"),
@@ -136,13 +157,20 @@
       filetype: document.getElementById("fileType"),
       downloadResults: document.getElementById("downloadResults"),
       uploadHeading: document.getElementById("uploadFile"),
-      clearImage: document.getElementById("clearImage")
+      clearImage: document.getElementById("clearImage"),
+      htmlVideoTag: document.getElementById("htmlVideoTag"),
+      hiddenCanvas: document.getElementById("hiddenCanvas"),
+      videoPane: document.getElementById("video_pane"),
+      grabSnapshot: document.getElementById("grabSnapshot"),
+      backToVideo: document.getElementById("backToVideo"),
     }
+
+    
 
     // Page listeners
     const msfe = new ModelServerFrontEnd(pageElements);
-    document.getElementById("runAlgoButton").addEventListener("click", msfe.validateAndSubmit.bind(this));
-    pageElements.fileInput.addEventListener("change", msfe.validateAndPreview.bind(this));
+    document.getElementById("runAlgoButton").addEventListener("click", msfe.validateAndSubmit.bind(msfe));
+    pageElements.fileInput.addEventListener("change", msfe.validateAndPreview.bind(msfe));
     
     // trigger file box from heading too
     pageElements.uploadHeading.addEventListener("click", (e) => {
@@ -150,10 +178,17 @@
     });
 
     // clear the preview & reset if clear image is selected
-    pageElements.clearImage.addEventListener("click", () => {
-      pageElements.fileInput.value = "";
-      msfe.preview(null)
-    });
+    pageElements.clearImage.addEventListener("click", msfe.clearFile.bind(msfe));
+    
+    // initiate preview of snapshot
+    pageElements.grabSnapshot.addEventListener("click", msfe.snapshotAndPreview.bind(msfe));
+
+    //
+    pageElements.htmlVideoTag.addEventListener('loadeddata', function() {
+      pageElements.hiddenCanvas.width = pageElements.htmlVideoTag.videoWidth;
+      pageElements.hiddenCanvas.height = pageElements.htmlVideoTag.videoHeight;
+    }, false);
+
   </script>
 </body>
 

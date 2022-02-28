@@ -1,167 +1,168 @@
-var fakeData = {
-   "success": true,
-   "predictions": [
-       {
-           "category_id": "Glass sponge",
-           "scores": [
-               0.936853289604187
-           ],
-           "bbox": [
-               221.26730346679688,
-               95.90970611572266,
-               275.6682434082031,
-               158.79237365722656
-           ]
-       },
-       {
-           "category_id": "Glass sponge",
-           "scores": [
-               0.9360066652297974
-           ],
-           "bbox": [
-               390.29974365234375,
-               205.02911376953125,
-               412.7304382324219,
-               240.4307861328125
-           ]
-       },
-       {
-           "category_id": "Crab",
-           "scores": [
-               0.9176263809204102
-           ],
-           "bbox": [
-               370.3782958984375,
-               120.75619506835938,
-               396.8592529296875,
-               170.28118896484375
-           ]
-       },
-       {
-           "category_id": "Anemone",
-           "scores": [
-               0.8222666382789612
-           ],
-           "bbox": [
-               338.8046875,
-               240.5189666748047,
-               358.1540222167969,
-               262.97900390625
-           ]
-       },
-       {
-           "category_id": "Shrimp",
-           "scores": [
-               0.7843353748321533
-           ],
-           "bbox": [
-               351.8642883300781,
-               333.50933837890625,
-               367.9346618652344,
-               356.86712646484375
-           ]
-       },
-       {
-           "category_id": "Sea star",
-           "scores": [
-               0.6080804467201233
-           ],
-           "bbox": [
-               273.8749694824219,
-               191.44650268554688,
-               295.8823547363281,
-               219.82554626464844
-           ]
-       },
-       {
-           "category_id": "Anemone",
-           "scores": [
-               0.4814399182796478
-           ],
-           "bbox": [
-               413.636474609375,
-               97.76058197021484,
-               425.3978271484375,
-               108.77407836914062
-           ]
-       },
-       {
-           "category_id": "Anemone",
-           "scores": [
-               0.4343058168888092
-           ],
-           "bbox": [
-               114.55255126953125,
-               208.422119140625,
-               129.5889892578125,
-               221.33343505859375
-           ]
-       },
-       {
-           "category_id": "Shrimp",
-           "scores": [
-               0.31218352913856506
-           ],
-           "bbox": [
-               202.02691650390625,
-               99.27082824707031,
-               221.85006713867188,
-               110.91401672363281
-           ]
-       },
-       {
-           "category_id": "Crab",
-           "scores": [
-               0.272942453622818
-           ],
-           "bbox": [
-               371.9002685546875,
-               126.96249389648438,
-               391.0743408203125,
-               149.70510864257812
-           ]
-       },
-       {
-           "category_id": "Glass sponge",
-           "scores": [
-               0.21144063770771027
-           ],
-           "bbox": [
-               229.55535888671875,
-               107.83536529541016,
-               288.4970703125,
-               192.87518310546875
-           ]
-       },
-       {
-           "category_id": "Gastropod",
-           "scores": [
-               0.21023178100585938
-           ],
-           "bbox": [
-               248.8347930908203,
-               189.96746826171875,
-               281.1795959472656,
-               218.367431640625
-           ]
-       },
-       {
-           "category_id": "Anemone",
-           "scores": [
-               0.2003752887248993
-           ],
-           "bbox": [
-               350.1575927734375,
-               134.4268798828125,
-               370.12908935546875,
-               156.498779296875
-           ]
-       }
-   ]
-};
+// var fakeData = {
+//    "success": true,
+//    "predictions": [
+//       {
+//          "category_id": "Glass sponge",
+//          "scores": [
+//             0.936853289604187
+//          ],
+//          "bbox": [
+//             221.26730346679688,
+//             95.90970611572266,
+//             275.6682434082031,
+//             158.79237365722656
+//          ]
+//       },
+//       {
+//          "category_id": "Glass sponge",
+//          "scores": [
+//             0.9360066652297974
+//          ],
+//          "bbox": [
+//             390.29974365234375,
+//             205.02911376953125,
+//             412.7304382324219,
+//             240.4307861328125
+//          ]
+//       },
+//       {
+//          "category_id": "Crab",
+//          "scores": [
+//             0.9176263809204102
+//          ],
+//          "bbox": [
+//             370.3782958984375,
+//             120.75619506835938,
+//             396.8592529296875,
+//             170.28118896484375
+//          ]
+//       },
+//       {
+//          "category_id": "Anemone",
+//          "scores": [
+//             0.8222666382789612
+//          ],
+//          "bbox": [
+//             338.8046875,
+//             240.5189666748047,
+//             358.1540222167969,
+//             262.97900390625
+//          ]
+//       },
+//       {
+//          "category_id": "Shrimp",
+//          "scores": [
+//             0.7843353748321533
+//          ],
+//          "bbox": [
+//             351.8642883300781,
+//             333.50933837890625,
+//             367.9346618652344,
+//             356.86712646484375
+//          ]
+//       },
+//       {
+//          "category_id": "Sea star",
+//          "scores": [
+//             0.6080804467201233
+//          ],
+//          "bbox": [
+//             273.8749694824219,
+//             191.44650268554688,
+//             295.8823547363281,
+//             219.82554626464844
+//          ]
+//       },
+//       {
+//          "category_id": "Anemone",
+//          "scores": [
+//             0.4814399182796478
+//          ],
+//          "bbox": [
+//             413.636474609375,
+//             97.76058197021484,
+//             425.3978271484375,
+//             108.77407836914062
+//          ]
+//       },
+//       {
+//          "category_id": "Anemone",
+//          "scores": [
+//             0.4343058168888092
+//          ],
+//          "bbox": [
+//             114.55255126953125,
+//             208.422119140625,
+//             129.5889892578125,
+//             221.33343505859375
+//          ]
+//       },
+//       {
+//          "category_id": "Shrimp",
+//          "scores": [
+//             0.31218352913856506
+//          ],
+//          "bbox": [
+//             202.02691650390625,
+//             99.27082824707031,
+//             221.85006713867188,
+//             110.91401672363281
+//          ]
+//       },
+//       {
+//          "category_id": "Crab",
+//          "scores": [
+//             0.272942453622818
+//          ],
+//          "bbox": [
+//             371.9002685546875,
+//             126.96249389648438,
+//             391.0743408203125,
+//             149.70510864257812
+//          ]
+//       },
+//       {
+//          "category_id": "Glass sponge",
+//          "scores": [
+//             0.21144063770771027
+//          ],
+//          "bbox": [
+//             229.55535888671875,
+//             107.83536529541016,
+//             288.4970703125,
+//             192.87518310546875
+//          ]
+//       },
+//       {
+//          "category_id": "Gastropod",
+//          "scores": [
+//             0.21023178100585938
+//          ],
+//          "bbox": [
+//             248.8347930908203,
+//             189.96746826171875,
+//             281.1795959472656,
+//             218.367431640625
+//          ]
+//       },
+//       {
+//          "category_id": "Anemone",
+//          "scores": [
+//             0.2003752887248993
+//          ],
+//          "bbox": [
+//             350.1575927734375,
+//             134.4268798828125,
+//             370.12908935546875,
+//             156.498779296875
+//          ]
+//       }
+//    ]
+// };
+var arrayOfBlobs = [];
 class ModelServerFrontEnd {
    constructor({ form, submitButton, fileInput, hiddenError, previewImg, imagePane, svgDiv, successEl, predictionsEl,
-      filename, filesize, filetype, downloadResults, clearImage, uploadHeading }) {
+      filename, filesize, filetype, downloadResults, clearImage, uploadHeading, htmlVideoTag, hiddenCanvas, videoPane, grabSnapshot, backToVideo }) {
       this._svgDiv = svgDiv;
       this._currentSvg = null;
       this._scaleDiff = 0;
@@ -183,9 +184,31 @@ class ModelServerFrontEnd {
       this._downloadResults = downloadResults;
       this._clearImage = clearImage;
       this._uploadHeading = uploadHeading;
+      this._videoPane = videoPane;
+      this._htmlVideoTag = htmlVideoTag;
+      this._hiddenCanvas = hiddenCanvas;
+      this._grabSnapshot = grabSnapshot;
+      this._backToVideo = backToVideo;
+
+      this._acceptedImgTypes = ["apng", "avif", "jpeg", "gif", "png", "svg", "webp"];
+      this._acceptedVideoTypes = ["mp4", "webm", "3gp", "mpeg", "quicktime", "ogg"];
+
+      this._ctx = this._hiddenCanvas.getContext('2d');
 
       this._downloadResults.addEventListener("click", this.downloadObjectAsJson.bind(this));
+ 
+      window.requestAnimationFrame(this.draw);
+
+      this._backToVideo.addEventListener("click", () => {
+         this.videoTmpHide(false);
+      });
    }
+
+   draw = () => {
+      this._ctx.drawImage(this._htmlVideoTag, 0, 0, this._hiddenCanvas.width, this._hiddenCanvas.height);
+      //edit the image here
+      window.requestAnimationFrame(this.draw);
+    };
 
    validateAndSubmit = (e) => {
       e.preventDefault();
@@ -197,58 +220,155 @@ class ModelServerFrontEnd {
       }
    }
 
-   preview = (file) => {
-      // new file reset results
-      this._predictionsEl.innerHTML = "";
-      this._successEl.innerHTML = "";
-      this._data = null;
-      this._imagePane.hidden = true;
-      this._previewImg.src = "";
-      this._filename.innerHTML = "";
-      this._filesize.innerHTML = "";
-      this._filetype.innerHTML = "";
-      this._svgDiv.innerHTML = "";
-      this._imagePane.hidden = true;
-      this._downloadResults.hidden = true;
+   clearFile() {
+      this.clearImageResults();
+      
       this._clearImage.hidden = true;
       this._uploadHeading.hidden = false;
 
+      this._filename.innerHTML = "";
+      this._filesize.innerHTML = "";
+      this._filetype.innerHTML = "";
+
+      this._htmlVideoTag.src = ""
+      this._htmlVideoTag.type = "";
+      this._videoPane.hidden = true;
+      this._htmlVideoTag.src = "";
+      this._grabSnapshot.hidden = true;
+   }
+
+   clearImageResults() {
+      this._hiddenError.innerHTML = ``;
+      this._predictionsEl.innerHTML = "";
+      this._successEl.innerHTML = "";
+      this._data = null;
+
+      this._imagePane.hidden = true;
+      this._previewImg.src = "";
+      this._svgDiv.innerHTML = "";
+
+      this._downloadResults.hidden = true;
+      
+      this._submitButton.disabled = true;
+      this._hiddenError.innerHTML = ``;
+   }
+
+   preview = async (file) => {
+      // new file reset results
+      this.clearFile();
+
       if (file) {
-         this._filename.innerHTML = file.name;
-         this._filesize.innerHTML = file.size;
-         this._filetype.innerHTML = file.type;
-         this._previewImg.src = URL.createObjectURL(file);
+         // console.log(file);
+         //Check the file type
+         const mediaType = file.type.split("/")[0];
+         const fileType = file.type.split("/")[1];
+         const type = file.type.split("/")[0];
+         // console.log(mediaType);
+
+         if (mediaType == "image" && this._fi) {
+            this._filename.innerHTML = file.name;
+            this._filesize.innerHTML = file.size;
+            this._filetype.innerHTML = file.type;
+            this._previewImg.src = URL.createObjectURL(file);
+            this._clearImage.hidden = false;
+            this._uploadHeading.hidden = true;
+            this._submitButton.disabled = false;
+
+            this._previewImg.onload = (e) => {
+               this._imagePane.hidden = false;
+               console.log("New preview loaded.....")
+               // this._scaleDiff = this._previewImg.width / this._previewImg.naturalWidth;
+               this._viewBox = { width: this._previewImg.naturalWidth, height: this._previewImg.naturalHeight };
+               // this._svgDiv.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
+               // this._imagePane.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
+            }
+         } else if (mediaType == "video") {
+            this._filename.innerHTML = file.name;
+            this._filesize.innerHTML = file.size;
+            this._filetype.innerHTML = file.type;
+            this._grabSnapshot.hidden = false;
+
+            var url = URL.createObjectURL(new Blob( [ file ] ) ); 
+            this._htmlVideoTag.src = url;
+
+            // this._htmlVideoTag.src = URL.createObjectURL(new Blob([buf]));
+            this._htmlVideoTag.type = file.type;
+            this._clearImage.hidden = false;
+            this._uploadHeading.hidden = true;
+            // this._submitButton.disabled = false;
+
+            // this._htmlVideoTag.onload = (e) => {
+            this._videoPane.hidden = false;
+            console.log("New *video* loaded.....")
+            // }
+         } else {
+            this._hiddenError.innerHTML = `File must a valid <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img" target="_blank">image</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs#common_codecs" target="_blank">video</a> type.`;
+         }
+      }
+
+   }
+
+   videoTmpHide = (bool) => {
+      if (bool) {
+         this._grabSnapshot.hidden = true;
+         this._backToVideo.hidden = false;
+         this._htmlVideoTag.hidden = true;
+      } else {
+         this.clearImageResults();
+         this._grabSnapshot.hidden = false;
+         this._backToVideo.hidden = true;
+         this._htmlVideoTag.hidden = false;      
+      }
+   }
+
+   _previewFromSnapshotUrl = (imgURL) => {
+      // do we clear the file data? would mess up video... but maybe
+      // this.clearFile();
+
+      this.videoTmpHide(true);
+
+      if (imgURL) {
+         // console.log(`Loading image preview from object url: ${imgURL}`);
+
+         this._previewImg.src = imgURL;
          this._clearImage.hidden = false;
          this._uploadHeading.hidden = true;
+         this._submitButton.disabled = false;
 
          this._previewImg.onload = (e) => {
             this._imagePane.hidden = false;
-            console.log("New preview loaded.....")
+            console.log("New preview from snapshot loaded.....")
             // this._scaleDiff = this._previewImg.width / this._previewImg.naturalWidth;
             this._viewBox = { width: this._previewImg.naturalWidth, height: this._previewImg.naturalHeight };
             // this._svgDiv.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
             // this._imagePane.setAttribute("style", `width: ${this._viewBox.width}px; height: ${this._viewBox.height}px`);
          }
-
       }
-
    }
 
    validateFile = (file) => {
+      this._hiddenError.innerHTML = ``;
       if (file) {
          this._submitButton.disabled = false;
          return { ok: true, message: "" };
       } else {
          this._submitButton.disabled = true;
+         this._hiddenError.innerHTML = `Error with file.`;
          return { ok: false, message: "Error with file" };
       }
    }
 
+   snapshotAndPreview() {      
+      this._htmlVideoTag.pause();
+      const frameURL = this._hiddenCanvas.toDataURL("image/png");;
+      this._previewFromSnapshotUrl(frameURL);
+   }
+
    postFile = () => {
       // FOR TESTING:: define &   
-      console.log("Handling fake data.");
-      console.log(fakeData);
-      return this.handleData(fakeData);
+      // console.log("Handling fake data.");
+      // console.log(fakeData);
+      // return this.handleData(fakeData);
       var myHeaders = new Headers();
       myHeaders.append("Accept", "*/*");
       myHeaders.append("Connection", "keep-alive");
@@ -270,9 +390,13 @@ class ModelServerFrontEnd {
          .then(response => response.json())
          .then(data => {
             console.log(data);
+            this._hiddenError.innerHTML = ``;
             return this.handleData(data);
          })
-         .catch(error => console.error('Could not fetch predictions.', error));
+         .catch(error => {
+            console.error('Could not fetch predictions.', error)
+            this._hiddenError.innerHTML = `Could not fetch predictions.`;
+         });
    }
 
 
@@ -471,8 +595,8 @@ class ModelServerFrontEnd {
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", exportName + ".json");
       document.body.appendChild(downloadAnchorNode); // required for firefox
-      
+
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
-    }
+   }
 }
