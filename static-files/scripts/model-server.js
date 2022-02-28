@@ -265,7 +265,7 @@ class ModelServerFrontEnd {
          const type = file.type.split("/")[0];
          // console.log(mediaType);
 
-         if (mediaType == "image" && this._fi) {
+         if (mediaType == "image") {
             this._filename.innerHTML = file.name;
             this._filesize.innerHTML = file.size;
             this._filetype.innerHTML = file.type;
