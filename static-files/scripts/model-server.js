@@ -159,7 +159,7 @@
 //       }
 //    ]
 // };
-var arrayOfBlobs = [];
+
 class ModelServerFrontEnd {
    constructor({ form, submitButton, fileInput, hiddenError, previewImg, imagePane, svgDiv, successEl, predictionsEl,
       filename, filesize, filetype, downloadResults, clearImage, uploadHeading, htmlVideoTag, hiddenCanvas, videoPane, grabSnapshot, backToVideo }) {
@@ -186,7 +186,8 @@ class ModelServerFrontEnd {
       this._uploadHeading = uploadHeading;
       this._videoPane = videoPane;
       this._htmlVideoTag = htmlVideoTag;
-      this._hiddenCanvas = hiddenCanvas;
+      // this._hiddenCanvas = hiddenCanvas;
+      this._hiddenCanvas = new OffscreenCanvas(256,256);
       this._grabSnapshot = grabSnapshot;
       this._backToVideo = backToVideo;
 
@@ -358,10 +359,13 @@ class ModelServerFrontEnd {
       }
    }
 
-   snapshotAndPreview() {      
+   snapshotAndPreview = async () => {      
       this._htmlVideoTag.pause();
-      const frameURL = this._hiddenCanvas.toDataURL("image/png");;
-      this._previewFromSnapshotUrl(frameURL);
+
+      const pngData = await this._hiddenCanvas.convertToBlob();
+      const pngFile = URL.createObjectURL(pngData);
+      // const frameURL = this._hiddenCanvas.toDataURL("image/png");
+      this._previewFromSnapshotUrl(pngFile);
    }
 
    postFile = () => {
