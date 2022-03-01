@@ -1,6 +1,6 @@
 FROM cvisionai/openem_lite:latest
 RUN apt update
-RUN pip3 install redis
+RUN pip3 install redis configargparse
 RUN pip3 install torch torchvision torchaudio
 RUN pip3 install detectron2 -f \
   https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch1.10/index.html
