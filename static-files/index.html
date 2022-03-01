@@ -4,8 +4,9 @@
 <head>
   <meta charset="utf-8">
   <title>Model Server Front End</title>
-  <link href="/static/styles.css?v=1.000" rel="stylesheet">
+  <link href="/static/styles.css?v=1.001" rel="stylesheet">
   <!-- <link href="styles.css" rel="stylesheet"> -->
+  
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 </head>
@@ -138,7 +139,7 @@
       vuetify: new Vuetify(),
     })
   </script>
-  <script src="/static/scripts/model-server.js?v=1.000"></script>
+  <script src="/static/scripts/model-server.js?v=1.001"></script>
   <!-- <script src="scripts/model-server.js"></script> -->
   <script type="text/javascript">
     const pageElements = {
@@ -165,29 +166,8 @@
       backToVideo: document.getElementById("backToVideo"),
     }
 
-    
-
-    // Page listeners
+    // Init page elements to js class
     const msfe = new ModelServerFrontEnd(pageElements);
-    document.getElementById("runAlgoButton").addEventListener("click", msfe.validateAndSubmit.bind(msfe));
-    pageElements.fileInput.addEventListener("change", msfe.validateAndPreview.bind(msfe));
-    
-    // trigger file box from heading too
-    pageElements.uploadHeading.addEventListener("click", (e) => {
-      pageElements.fileInput.click();
-    });
-
-    // clear the preview & reset if clear image is selected
-    pageElements.clearImage.addEventListener("click", msfe.clearFile.bind(msfe));
-    
-    // initiate preview of snapshot
-    pageElements.grabSnapshot.addEventListener("click", msfe.snapshotAndPreview.bind(msfe));
-
-    //
-    pageElements.htmlVideoTag.addEventListener('loadeddata', function() {
-      pageElements.hiddenCanvas.width = pageElements.htmlVideoTag.videoWidth;
-      pageElements.hiddenCanvas.height = pageElements.htmlVideoTag.videoHeight;
-    }, false);
 
   </script>
 </body>
