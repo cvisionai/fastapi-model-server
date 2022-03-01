@@ -10,6 +10,7 @@ from detectron2.modeling import build_model
 from detectron2.data import transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
+import configargparse
 import numpy as np
 import settings
 import helpers
@@ -48,11 +49,6 @@ def parse_args():
 
     return parser.parse_args()
 
-def load_video(vid_id):
-    '''Loads video file. Add logic for fetching videos from Tator here'''    
-    vid = cv2.VideoCapture(vid_id)
-    return vid
-
 def load_model(args):
     '''Load model architecture and weights
     '''
@@ -60,8 +56,6 @@ def load_model(args):
     cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/retinanet_R_50_FPN_3x.yaml"))
     cfg.merge_from_file(args.model_config_file)
     cfg.MODEL.RETINANET.SCORE_THRESH_TEST = args.score_threshold
-    #cfg.MODEL.DEVICE = 'cpu'
-
     cfg.MODEL.WEIGHTS = os.path.join(args.model_weights_file)  # path to the model we just trained
     model = build_model(cfg)  # returns a torch.nn.Module
     checkpointer = DetectionCheckpointer(model)
@@ -237,8 +231,6 @@ def classify_process():
                 
                     results.append(image_result)
                 batch_results.append(results)
-                # loop over the image IDs and their corresponding set of
-                # results from our model
             # loop over the image IDs and their corresponding set of
             # results from our model
             for (imageID, resultSet) in zip(imageIDs, batch_results):
@@ -247,7 +239,7 @@ def classify_process():
                 db.set(imageID, json.dumps(resultSet))
 
         # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP + random.uniform(0.05,0.1))
+        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01,0.02))
 
 # if this is the main thread of execution start the model server
 # process

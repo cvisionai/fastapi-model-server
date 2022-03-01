@@ -1,6 +1,5 @@
 # import the necessary packages
-import torchvision
-import os
+
 import torch
 import logging
 
@@ -32,52 +31,31 @@ class DictToDotNotation:
             setattr(self, k, v)
 
 def parse_args():
-    parser = configargparse.ArgumentParser(description="Testing script for testing video data.",
-            config_file_parser_class=configargparse.YAMLConfigFileParser,
-            formatter_class=configargparse.ArgumentDefaultsHelpFormatter)
-    parser.add("-c", "--config", required=True, is_config_file=True, help="Default config file path")
-    parser.add("--model_config_file", help="Detectron2 config file")
-    parser.add("--model_weights_file", help=".pth file with Detectron2 weights")
-    parser.add("--score_threshold", help="Score threshold for boxes", type=float, default=0.4)
-
-    return parser.parse_args()
+    pass
 
 def load_model(args):
     '''Load model architecture and weights
     '''
     model = torch.hub.load('ultralytics/yolov5','custom',path=args.model_weights_file)
     model.conf = args.score_threshold
+    model.agnostic = True
 
     return model
 
 def create_augmentations():
     '''Generate list of augmentations to perform before inference
     '''
-    aug1 = T.ResizeShortestEdge(
-            [720, 720], 1280)
-    aug2 = T.ResizeShortestEdge(
-            [540, 540], 960)
-    aug3 = T.ResizeShortestEdge(
-            [1080, 1080], 1920)
-
-    return [aug1, aug2, aug3]
+    pass
     
 def augment_images(augs, image_batch):
     '''Generate augmented images based on list of input augmentations
     '''
-    if len(image_batch) > 0:
-        aug_imgs = []
-        for img in image_batch:
-            aug_imgs.append({f"im_{i}" : augs[i].get_transform(img).apply_image(img) for i in range(len(augs))})
-    return aug_imgs
+    pass
 
 def process_nms(model_outputs):
     '''Seperate function so that we can substitute more complex logic (e.g. inter vs intra class NMS)
     '''
-    nms_op = torchvision.ops.nms
-    model_outputs[0]["instances"] = model_outputs[0]["instances"][nms_op(model_outputs[0]["instances"].pred_boxes.tensor, model_outputs[0]["instances"].scores, 0.45).to("cpu").tolist()]
-
-    return model_outputs
+    pass
 
 def process_model(model, aug_imgs, im_width, im_height):
     with torch.no_grad():
@@ -88,10 +66,9 @@ def process_model(model, aug_imgs, im_width, im_height):
 def process_model_outputs(model_outputs):
     '''Transform model outputs into lists of boxes, scores, and labels
     '''
-    
     results = model_outputs.pred[0].cpu().numpy()
     output_boxes = [[float(arr[0]),float(arr[1]),float(arr[2]),float(arr[3])] for arr in results]
-    output_scores = [[float(arr[4])] for arr in results]
+    output_scores = [float(arr[4]) for arr in results]
     output_classes = [int(arr[5]) for arr in results]
 
     return output_boxes, output_scores, output_classes
@@ -119,6 +96,8 @@ def classify_process():
     while True:
         # attempt to grab a batch of images from the database, then
         # initialize the image IDs and batch of images themselves
+        # Even with batch size 1 we use a list so that the iterator
+        # fails gracefully in the loop
         queue = db.lrange(settings.IMAGE_QUEUE, 0,
             settings.BATCH_SIZE - 1)
 
@@ -175,15 +154,13 @@ def classify_process():
             batch_results.append(results)
             # loop over the image IDs and their corresponding set of
             # results from our model
-        # loop over the image IDs and their corresponding set of
-        # results from our model
             for (imageID, resultSet) in zip(imageIDs, batch_results):
                 # store the output predictions in the database, using
                 # the image ID as the key so we can fetch the results
                 db.set(imageID, json.dumps(resultSet))
 
         # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP + random.uniform(0.05,0.1))
+        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01, 0.02))
 
 # if this is the main thread of execution start the model server
 # process
