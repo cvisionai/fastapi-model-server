@@ -50,16 +50,16 @@ class ModelServerFrontEnd {
       });
 
       // clear the preview & reset if clear image is selected
-      this._clearImage.addEventListener("click", this.clearFile.bind(this));
+      this._clearImage.addEventListener("click", this.clearAndRemoveFile.bind(this));
 
       // initiate preview of snapshot
       this._grabSnapshot.addEventListener("click", this.snapshotAndPreview.bind(this));
 
       //
-      this._htmlVideoTag.addEventListener('loadeddata', function () {
-         this._hiddenCanvas.width = this._htmlVideoTag.videoWidth;
-         this._hiddenCanvas.height = this._htmlVideoTag.videoHeight;
-      }, false);
+      // this._htmlVideoTag.addEventListener('loadeddata', function () {
+      //    this._hiddenCanvas.width = this._htmlVideoTag.videoWidth;
+      //    this._hiddenCanvas.height = this._htmlVideoTag.videoHeight;
+      // }, false);
 
       this._backToVideo.addEventListener("click", () => {
          this.videoTmpHide(false);
@@ -82,6 +82,11 @@ class ModelServerFrontEnd {
       }
    }
 
+   clearAndRemoveFile() {
+      this.clearFile();
+      this._fileInput.value = "";
+   }
+
    clearFile() {
       this.clearImageResults();
       this._formBlobData = null;
@@ -95,9 +100,12 @@ class ModelServerFrontEnd {
 
       this._htmlVideoTag.src = ""
       this._htmlVideoTag.type = "";
+      
       this._videoPane.hidden = true;
-      this._htmlVideoTag.src = "";
+      this._htmlVideoTag.hidden = false;
+
       this._grabSnapshot.hidden = true;
+      this._backToVideo.hidden = true;
    }
 
    clearImageResults() {
@@ -480,9 +488,6 @@ class ModelServerFrontEnd {
 
    validateAndPreview = () => {
       const file = this._fileInput.files[0];
-      
-      // Now we can clear it
-      this._fileInput.value = "";
 
       this.validateFile(file);
       this.preview(file);
