@@ -186,15 +186,21 @@ class ModelServerFrontEnd {
       this._uploadHeading = uploadHeading;
       this._videoPane = videoPane;
       this._htmlVideoTag = htmlVideoTag;
-      // this._hiddenCanvas = hiddenCanvas;
+      
       this._hiddenCanvas = new OffscreenCanvas(256,256);
       this._grabSnapshot = grabSnapshot;
       this._backToVideo = backToVideo;
-
+      
+      // this._hiddenCanvas = hiddenCanvas;
+      this._hiddenCanvas = new OffscreenCanvas(1200, 800);   
+      
+      // #todo use include to check for types in preview function
       this._acceptedImgTypes = ["apng", "avif", "jpeg", "gif", "png", "svg", "webp"];
       this._acceptedVideoTypes = ["mp4", "webm", "3gp", "mpeg", "quicktime", "ogg"];
 
       this._ctx = this._hiddenCanvas.getContext('2d');
+      // this._offscreenDraw = new DrawGL(this._hiddenCanvas);
+      this._offscreenDraw = this._hiddenCanvas.getContext('webgl');
 
       this._downloadResults.addEventListener("click", this.downloadObjectAsJson.bind(this));
  
@@ -292,15 +298,22 @@ class ModelServerFrontEnd {
             var url = URL.createObjectURL(new Blob( [ file ] ) ); 
             this._htmlVideoTag.src = url;
 
-            // this._htmlVideoTag.src = URL.createObjectURL(new Blob([buf]));
-            this._htmlVideoTag.type = file.type;
-            this._clearImage.hidden = false;
-            this._uploadHeading.hidden = true;
-            // this._submitButton.disabled = false;
 
-            // this._htmlVideoTag.onload = (e) => {
-            this._videoPane.hidden = false;
-            console.log("New *video* loaded.....")
+            this._htmlVideoTag.onloadeddata = () => {
+               console.log(this._htmlVideoTag.videoWidth);
+               this._hiddenCanvas.width = this._htmlVideoTag.videoWidth;
+               this._hiddenCanvas.height = this._htmlVideoTag.videoHeight;
+               // this._htmlVideoTag.src = URL.createObjectURL(new Blob([buf]));
+               this._htmlVideoTag.type = file.type;
+               this._clearImage.hidden = false;
+               this._uploadHeading.hidden = true;
+               // this._submitButton.disabled = false;
+   
+               // this._htmlVideoTag.onload = (e) => {
+               this._videoPane.hidden = false;
+               console.log("New *video* loaded.....")
+            }
+
             // }
          } else {
             this._hiddenError.innerHTML = `File must a valid <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img" target="_blank">image</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs#common_codecs" target="_blank">video</a> type.`;
