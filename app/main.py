@@ -72,7 +72,7 @@ async def homepage():
     return FileResponse('/static-files/index.html')
 
 @app.post("/predictor/")
-def predict(file: UploadFile = File(...)):
+def predict(file: UploadFile = File(...), path: str = settings.IMAGE_QUEUE):
     # initialize the data dictionary that will be returned from the
     # view
     data = {"success": False}
@@ -102,7 +102,7 @@ def predict(file: UploadFile = File(...)):
     k = str(uuid.uuid4())
     image = helpers.base64_encode_image(image)
     d = {"id": k, "image": image, "height": height, "width": width}
-    db.rpush(settings.IMAGE_QUEUE, json.dumps(d))
+    db.rpush(path, json.dumps(d))
     # keep looping until our model server returns the output
     # predictions
     while True:
