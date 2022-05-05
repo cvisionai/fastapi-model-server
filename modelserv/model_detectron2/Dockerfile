@@ -3,7 +3,7 @@ RUN apt update
 RUN pip3 install redis configargparse
 RUN pip3 install torch torchvision torchaudio
 RUN pip3 install detectron2 -f \
-  https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch1.10/index.html
+  https://dl.fbaipublicfiles.com/detectron2/wheels/cu102/torch1.10/index.html
 COPY ./modelserv/run_model_server_detectron.py /scripts/run_model_server_detectron.py
 COPY ./app/settings.py /scripts/settings.py
 COPY ./app/helpers.py /scripts/helpers.py
