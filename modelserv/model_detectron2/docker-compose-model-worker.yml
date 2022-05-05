@@ -5,8 +5,8 @@ services:
   modelserv:
     image: modelserv:latest
     build:
-      context: .
-      dockerfile: ./modelserv/Dockerfile
+      context: ../../
+      dockerfile: ./modelserv/model_detectron2/Dockerfile
     #container_name: "modelserv"
     deploy:
       resources:
