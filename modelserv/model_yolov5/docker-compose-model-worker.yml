@@ -32,6 +32,6 @@ networks:
   keras-model-server-fast-api_backend:
     external: True
 
-# Use this command. Note that the -p switch tells it it's a separate project from the main API, so you have to use the networks definitions above to be able to use service discovery.
+# Use this command. Note that the -p switch tells it it's a separate project from the main API, so you have to use the networks definitions above to be able to use service discovery. You also need to run this command from the main repo directory because of docker context nonsense.
 
-# docker-compose -f docker-compose-model-worker.yml -p model-workers up --build modelserv
+# docker-compose -f ./modelserv/model_yolov5/docker-compose-model-worker.yml -p model-workers up --build modelserv
