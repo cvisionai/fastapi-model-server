@@ -172,44 +172,39 @@ def classify_process():
     label_map = create_labelset()
     # continually pool for new images to classify
     while True:
-        # attempt to grab a batch of images from the database, then
-        # initialize the image IDs and batch of images themselves
-        queue = db.lrange(settings.IMAGE_QUEUE, 0,
-            settings.BATCH_SIZE - 1)
-
-        # remove the set of images from our queue
-        db.ltrim(settings.IMAGE_QUEUE, len(queue), -1)
+        # monitor queue for jobs and grab one when present
+        q = db.blpop(settings.IMAGE_QUEUE)
+        logger.info(q[0])
+        q = q[1]
         imageIDs = []
         batch = None
 
-        # loop over the queue
-        for q in queue:
-            # deserialize the object and obtain the input image
-            q = json.loads(q.decode("utf-8"))
-            img_width = q["width"]
-            img_height = q["height"]
-            image = helpers.base64_decode_image(q["image"],
-                settings.IMAGE_DTYPE,
-                (1, img_height, img_width,
-                    settings.IMAGE_CHANS))
+        # deserialize the object and obtain the input image
+        q = json.loads(q.decode("utf-8"))
+        img_width = q["width"]
+        img_height = q["height"]
+        image = helpers.base64_decode_image(q["image"],
+            settings.IMAGE_DTYPE,
+            (1, img_height, img_width,
+                settings.IMAGE_CHANS))
 
-            # check to see if the batch list is None
-            if batch is None:
-                batch = image
+        # check to see if the batch list is None. Currently
+        # only batch size of 1 is supported, future growth.
+        if batch is None:
+            batch = image
+        # otherwise, stack the data
+        else:
+            batch = np.vstack([batch, image])
 
-            # otherwise, stack the data
-            else:
-                batch = np.vstack([batch, image])
+        # update the list of image IDs
+        imageIDs.append(q["id"])
 
-            # update the list of image IDs
-            imageIDs.append(q["id"])
-
-        # check to see if we need to process the batch
+        # check to see if we need to process the batch. 
+        # Currently only batch size of 1 is supporeted,
+        # future growth.
         if len(imageIDs) > 0:
             logger.info(imageIDs)
             batch_results = []
-
-            #im_height,im_width,_ = frame.shape
             # Create augmented images based on list of augmentations
             logger.info(f"Augmenting {len(batch)} images")
             aug_imgs = augment_images(augs, batch)
@@ -238,8 +233,6 @@ def classify_process():
                 # the image ID as the key so we can fetch the results
                 db.set(imageID, json.dumps(resultSet))
 
-        # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01,0.02))
 
 # if this is the main thread of execution start the model server
 # process
