@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -43,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 
 db = redis.StrictRedis(host=settings.REDIS_HOST,
@@ -63,7 +62,6 @@ def prepare_image(image, target):
     # convert to BGR, because that's what the model expects
     image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
-
     # return the processed image
     return image
 
@@ -72,7 +70,7 @@ async def homepage():
     return FileResponse('/static-files/index.html')
 
 @app.post("/predictor/")
-def predict(file: UploadFile = File(...), path: str = settings.IMAGE_QUEUE):
+def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # initialize the data dictionary that will be returned from the
     # view
     data = {"success": False}
@@ -81,6 +79,7 @@ def predict(file: UploadFile = File(...), path: str = settings.IMAGE_QUEUE):
     # classification
     #image = flask.request.files["image"].read()
     #image = Image.open(io.BytesIO(file.file))
+    logger.info(model_type)
     image = Image.open(file.file)
     width, height = image.size
     # if the image mode is not RGB, convert it
@@ -91,8 +90,6 @@ def predict(file: UploadFile = File(...), path: str = settings.IMAGE_QUEUE):
     image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
-    #image = prepare_image(image,
-    #    (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")
@@ -102,7 +99,7 @@ def predict(file: UploadFile = File(...), path: str = settings.IMAGE_QUEUE):
     k = str(uuid.uuid4())
     image = helpers.base64_encode_image(image)
     d = {"id": k, "image": image, "height": height, "width": width}
-    db.rpush(path, json.dumps(d))
+    db.rpush(model_type, json.dumps(d))
     # keep looping until our model server returns the output
     # predictions
     while True:
