@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Form
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 from PIL import Image
 import numpy as np
-import app.settings as settings
+import os
 import app.helpers as helpers
 import redis
 import uuid
@@ -30,9 +30,9 @@ app = FastAPI()
 
 origins = [
     "http://fast.localhost",
-    "http://fast.localhost:8080",
+    "http://fast.localhost:" + os.getenv("SERVER_PORT"),
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:" + os.getenv("SERVER_PORT"),
 ]
 
 app.add_middleware(
@@ -43,14 +43,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT, db=settings.REDIS_DB)
+db = redis.StrictRedis(host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB"))
 db.ping() 
 
-print(f"connected to redis: {settings.REDIS_HOST}") 
+print(f"connected to redis: {os.getenv('REDIS_HOST')}") 
 
 def prepare_image(image, target):
     # if the image mode is not RGB, convert it
@@ -63,7 +62,6 @@ def prepare_image(image, target):
     # convert to BGR, because that's what the model expects
     image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
-
     # return the processed image
     return image
 
@@ -72,7 +70,7 @@ async def homepage():
     return FileResponse('/static-files/index.html')
 
 @app.post("/predictor/")
-def predict(file: UploadFile = File(...)):
+def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # initialize the data dictionary that will be returned from the
     # view
     data = {"success": False}
@@ -81,6 +79,7 @@ def predict(file: UploadFile = File(...)):
     # classification
     #image = flask.request.files["image"].read()
     #image = Image.open(io.BytesIO(file.file))
+    logger.info(model_type)
     image = Image.open(file.file)
     width, height = image.size
     # if the image mode is not RGB, convert it
@@ -91,8 +90,6 @@ def predict(file: UploadFile = File(...)):
     image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
-    #image = prepare_image(image,
-    #    (settings.IMAGE_WIDTH, settings.IMAGE_HEIGHT))
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")
@@ -102,7 +99,7 @@ def predict(file: UploadFile = File(...)):
     k = str(uuid.uuid4())
     image = helpers.base64_encode_image(image)
     d = {"id": k, "image": image, "height": height, "width": width}
-    db.rpush(settings.IMAGE_QUEUE, json.dumps(d))
+    db.rpush(model_type, json.dumps(d))
     # keep looping until our model server returns the output
     # predictions
     while True:
@@ -125,7 +122,7 @@ def predict(file: UploadFile = File(...)):
 
         # sleep for a small amount to give the model a chance
         # to classify the input image
-        time.sleep(settings.CLIENT_SLEEP)
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
 
     # indicate that the request was a success
     data["success"] = True

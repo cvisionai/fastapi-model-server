@@ -6,16 +6,18 @@ import requests
 
 # initialize the Keras REST API endpoint URL along with the input
 # image path
-KERAS_REST_API_URL = "http://localhost/predictor/"
+MODEL_REST_API_URL = "https://your_domain_url:port/predictor/"
 IMAGE_PATH = "../images/00_01_13_13.png"
 
 # load the input image and construct the payload for the request
 image = open(IMAGE_PATH, "rb").read()
-payload = {"file": image, "type": "image/png"}
+payload = {
+    "file" : ("file", image, "image/png"),
+    "model_type" : (None, "image_queue_yolov5")
+}
 
 # submit the request
-r = requests.post(KERAS_REST_API_URL, files=payload).json()
-
+r = requests.post(MODEL_REST_API_URL, files=payload).json()
 # ensure the request was sucessful
 if r["success"]:
 	# loop over the predictions and display them

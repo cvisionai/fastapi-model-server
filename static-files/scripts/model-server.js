@@ -281,6 +281,7 @@ class ModelServerFrontEnd {
       // test
       console.log(this._formBlobData);
       formdata.append("file", this._formBlobData);
+      formdata.append("model_type", "image_queue_yolov5");
 
       // original
       // formdata.append("file", this._fileInput.files[0]);
@@ -292,8 +293,9 @@ class ModelServerFrontEnd {
          redirect: 'follow'
       };
 
+      var url = new URL("https://adamant.tator.io:8082/predictor/")
       this._successEl.innerHTML = "Loading....";
-      fetch("https://adamant.tator.io:8082/predictor/", requestOptions)
+      fetch(url, requestOptions)
          .then(response => response.json())
          .then(data => {
             console.log(data);

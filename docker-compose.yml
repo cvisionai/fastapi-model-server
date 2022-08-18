@@ -10,7 +10,7 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:8082"
+      - "--entrypoints.web.address=:${SERVER_PORT}"
       - "--providers.file.directory=/configuration"
       - "--providers.file.watch=true"
     ports:
@@ -21,7 +21,7 @@ services:
       - traefik-public
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "/home/ben/traefik/configuration/:/configuration/"
+      - "${TRAEFIK_CONFIG}:/configuration/"
 
   whoami:
     image: "containous/whoami"
@@ -38,12 +38,14 @@ services:
     image: fast:latest
     build: ./app/
     #container_name: "fast"
+    env_file:
+      - ./.env
     networks:
       - backend
       - traefik-public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fast.rule=Host(`adamant.tator.io`)"
+      - "traefik.http.routers.fast.rule=Host(`${SERVER_HOST}`)"
       - "traefik.http.routers.fast.entrypoints=web"
       - "traefik.http.routers.fast.tls=true"
       - "traefik.http.middlewares.addHeader.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT"
@@ -57,30 +59,6 @@ services:
       - ./script:/script
       - ./static-files:/static-files
     entrypoint: /start-reload.sh
-
-  modelserv:
-    image: modelserv:latest
-    build:
-      context: .
-      dockerfile: ./modelserv/Dockerfile
-    #container_name: "modelserv"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
-              device_ids: ['0']
-    networks:
-      - backend
-      - traefik-public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.modelserv.rule=Host(`modelserv.localhost`)"
-      - "traefik.http.routers.modelserv.entrypoints=web"
-    volumes:
-      - ./app:/app/app
-      - ./images:/images
-      - ./script:/script
 
   redis:
     image: redis:6
@@ -103,8 +81,60 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
-      - "traefik.port=6379"
+      - "traefik.port=${REDIS_PORT}"
     entrypoint: redis-server --maxmemory 2048mb --maxmemory-policy allkeys-lru
+ 
+  modelserv_yolov5:
+    image: modelserv_yolov5:latest
+    build: 
+      context: .
+      dockerfile: ./modelserv/model_yolov5/Dockerfile
+
+    #container_name: "modelserv"
+    env_file:
+      - ./.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0']
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.modelserv_yolov5.rule=Host(`modelserv_yolov5.localhost`)"
+      - "traefik.http.routers.modelserv_yolov5.entrypoints=web"
+    volumes:
+      - ./images:/images
+      - ./script:/script
+
+  modelserv_detectron2:
+    image: modelserv_detectron2:latest
+    build: 
+      context: .
+      dockerfile: ./modelserv/model_detectron2/Dockerfile
+    #container_name: "modelserv"
+    env_file:
+      - ./.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0']
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.modelserv.rule=Host(`modelserv_detectron2.localhost`)"
+      - "traefik.http.routers.modelserv.entrypoints=web"
+    volumes:
+      - ./images:/images
+      - ./script:/script
+
 networks:
   traefik-public:
     external: true

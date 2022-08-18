@@ -22,23 +22,26 @@ logger = logging.getLogger(__name__)
 # Note that inside the "fast" container, it uses port 80. Running
 # from outside you will want to specify the right port.
 
-#KERAS_REST_API_URL = "http://localhost/predictor/"
-KERAS_REST_API_URL = "http://localhost:8082/predictor/"
+MODEL_REST_API_URL = "https://your_domain_url:port/predictor/"
 IMAGE_PATH = "../images/00_01_13_13.png"
+
+# load the input image and construct the payload for the request
+image = open(IMAGE_PATH, "rb").read()
+payload = {
+    "file" : ("file", image, "image/png"),
+    "model_type" : (None, "image_queue_yolov5")
+}
 
 # initialize the number of requests for the stress test along with
 # the sleep amount between requests
 NUM_REQUESTS = 50
 SLEEP_COUNT = 0.05
 
-image = open(IMAGE_PATH, "rb").read()
 def call_predict_endpoint(n):
 	# load the input image and construct the payload for the request
-	
-	payload = {"file": image, "type": "image/png"}
 
 	# submit the request
-	r = requests.post(KERAS_REST_API_URL, files=payload).json()
+	r = requests.post(MODEL_REST_API_URL, files=payload).json()
 
 	# ensure the request was sucessful
 	if r["success"]:

@@ -1,7 +1,5 @@
 # import the necessary packages
-import torchvision
 import os
-import torch
 import logging
 
 from detectron2 import model_zoo
@@ -10,14 +8,11 @@ from detectron2.modeling import build_model
 from detectron2.data import transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
-import configargparse
 import numpy as np
-import settings
 import helpers
 import redis
 import time
 import json
-import random
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -29,8 +24,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # connect to Redis server
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT, db=settings.REDIS_DB)
+db = redis.StrictRedis(host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB"))
 
 class DictToDotNotation:
     '''Useful class for getting dot notation access to dict'''
@@ -172,44 +167,39 @@ def classify_process():
     label_map = create_labelset()
     # continually pool for new images to classify
     while True:
-        # attempt to grab a batch of images from the database, then
-        # initialize the image IDs and batch of images themselves
-        queue = db.lrange(settings.IMAGE_QUEUE, 0,
-            settings.BATCH_SIZE - 1)
-
-        # remove the set of images from our queue
-        db.ltrim(settings.IMAGE_QUEUE, len(queue), -1)
+        # monitor queue for jobs and grab one when present
+        q = db.blpop(os.getenv("IMAGE_QUEUE_DETECTRON2"))
+        logger.info(q[0])
+        q = q[1]
         imageIDs = []
         batch = None
 
-        # loop over the queue
-        for q in queue:
-            # deserialize the object and obtain the input image
-            q = json.loads(q.decode("utf-8"))
-            img_width = q["width"]
-            img_height = q["height"]
-            image = helpers.base64_decode_image(q["image"],
-                settings.IMAGE_DTYPE,
-                (1, img_height, img_width,
-                    settings.IMAGE_CHANS))
+        # deserialize the object and obtain the input image
+        q = json.loads(q.decode("utf-8"))
+        img_width = q["width"]
+        img_height = q["height"]
+        image = helpers.base64_decode_image(q["image"],
+            os.getenv("IMAGE_DTYPE"),
+            (1, img_height, img_width,
+                os.getenv("IMAGE_CHANS")))
 
-            # check to see if the batch list is None
-            if batch is None:
-                batch = image
+        # check to see if the batch list is None. Currently
+        # only batch size of 1 is supported, future growth.
+        if batch is None:
+            batch = image
+        # otherwise, stack the data
+        else:
+            batch = np.vstack([batch, image])
 
-            # otherwise, stack the data
-            else:
-                batch = np.vstack([batch, image])
+        # update the list of image IDs
+        imageIDs.append(q["id"])
 
-            # update the list of image IDs
-            imageIDs.append(q["id"])
-
-        # check to see if we need to process the batch
+        # check to see if we need to process the batch. 
+        # Currently only batch size of 1 is supporeted,
+        # future growth.
         if len(imageIDs) > 0:
             logger.info(imageIDs)
             batch_results = []
-
-            #im_height,im_width,_ = frame.shape
             # Create augmented images based on list of augmentations
             logger.info(f"Augmenting {len(batch)} images")
             aug_imgs = augment_images(augs, batch)
@@ -238,8 +228,6 @@ def classify_process():
                 # the image ID as the key so we can fetch the results
                 db.set(imageID, json.dumps(resultSet))
 
-        # sleep for a small amount
-        time.sleep(settings.SERVER_SLEEP + random.uniform(0.01,0.02))
 
 # if this is the main thread of execution start the model server
 # process
