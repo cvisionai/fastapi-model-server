@@ -1,3 +1,5 @@
+![Model Serving Example](./images/model-server-screenshot.png)
+
 This project is a model server that accepts POSTs with images in them, as well as a model to run on those images. Currently only object detection models are supported, and the return value of the request is the list of bounding boxes and class IDs, in JSON format. There is a model server front end page, which will display the image and draw the bounding boxes on that image, for quick review. 
 
 Some outstanding TODOs on the front end include supporting more than just object detection models, and being able to select the model as a dropdown. This will require an update on the back end to query the existing model services.
@@ -60,7 +62,6 @@ Browser Windows:
 - https://your_domain.com:port_number
 
 The model server front end is a very lightweight submission and viewing of results front end for object detection. This will be expanded in the future.
-![Model Serving Example](./images/model-server-screenshot.png)
 
 Test curl commands:
 ```bash
