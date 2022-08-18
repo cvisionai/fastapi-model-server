@@ -8,7 +8,7 @@ Some outstanding TODOs on the front end include supporting more than just object
 
 You will need a .env with the appropriate values filled in. The important deployment variables correspond to your host domain, host url, and host port, as well as the location of your traefik configuration folder, which you will need to have if you wish to use HTTPS. Some helpful hints about that folder. You will want to have three files, certificates.toml, fullchain.pem, privkey.pem (you don't need to keep the fullchain or privkey naming convention, but you need them to be consistent in the certificates.toml file). The certificates.toml file will contain
 
-```
+```toml
 [[tls.certificates]] #first certificate
     certFile = "/configuration/files/fullchain.pem" # managed by Certbot
     keyFile = "/configuration/files/privkey.pem" # managed by Certbot
@@ -25,7 +25,7 @@ The rest of the entries in the `.env` file are related to either the model servi
 
 ## Setting up model server examples
 
-The repository includes examples for two publicly available models related to the FathomNet project. One is based on Detectron2, and the other is based upon YOLOv5. Both of these examples require you to obtain some files that are not suitable for including in git repositories (e.g. large model checkpoint files). 
+The repository includes examples for two publicly available models related to the [FathomNet](https://fathomnet.org) project. One is based on Detectron2, and the other is based upon YOLOv5. Both of these examples require you to obtain some files that are not suitable for including in git repositories (e.g. large model checkpoint files). 
 
 ### Detectron2
 
@@ -58,7 +58,7 @@ docker-compose up --build
 You can scale services to be able to handle more requests by using --scale modelserv=N --scale fast=M. Experimentally you want more web servers (fast) than model servers because the model takes a little while to process. 
 
 Browser Windows:
-- http:///dashboard
+- https://your_domain.com:8080/dashboard
 - https://your_domain.com:port_number
 
 The model server front end is a very lightweight submission and viewing of results front end for object detection. This will be expanded in the future.
@@ -83,7 +83,7 @@ Stress test will probably want to run outside of a container, because it will on
 python3 stress_test.py
 ```
 
-### Application Organization
+## Application Organization
 
 The structure of this application is to create a web server that handles incoming model requests, and model workers that process those requests. The link between these parts is a redis instance. Requests get routed to queues based on the desired model, and the model workers continually query the proper queue for work. Each requests is given a unique id, and this id becomes a key in redis that the model worker populates with results when finished. The web server continually monitors for that key and then populates the HTTP response with results once it is received. Practically speaking this means there is a limit on the duration that an algorithm can take before a response times out. This conops is not the most robust, but it does accommodate a large amount of use cases. Further work could extend to asynchronous processing with persistent connections or notifications of job completion, but this starts to overlap with other tools that tend to be much better that those types of tasks.
 
