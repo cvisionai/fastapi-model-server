@@ -59,6 +59,9 @@ Browser Windows:
 - http:///dashboard
 - https://your_domain.com:port_number
 
+The model server front end is a very lightweight submission and viewing of results front end for object detection. This will be expanded in the future.
+![Model Serving Example](./images/model-server-screenshot.png)
+
 Test curl commands:
 ```bash
 curl -k https://your_domain.com:port_number/
