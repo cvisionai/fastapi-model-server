@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
 from PIL import Image
 import numpy as np
-import app.settings as settings
+import os
 import app.helpers as helpers
 import redis
 import uuid
@@ -30,9 +30,9 @@ app = FastAPI()
 
 origins = [
     "http://fast.localhost",
-    "http://fast.localhost:8080",
+    "http://fast.localhost:" + os.getenv("SERVER_PORT"),
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:" + os.getenv("SERVER_PORT"),
 ]
 
 app.add_middleware(
@@ -45,11 +45,11 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="/static-files"), name="static")
 
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT, db=settings.REDIS_DB)
+db = redis.StrictRedis(host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB"))
 db.ping() 
 
-print(f"connected to redis: {settings.REDIS_HOST}") 
+print(f"connected to redis: {os.getenv('REDIS_HOST')}") 
 
 def prepare_image(image, target):
     # if the image mode is not RGB, convert it
@@ -122,7 +122,7 @@ def predict(model_type: str = Form(...), file: UploadFile = File(...)):
 
         # sleep for a small amount to give the model a chance
         # to classify the input image
-        time.sleep(settings.CLIENT_SLEEP)
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
 
     # indicate that the request was a success
     data["success"] = True

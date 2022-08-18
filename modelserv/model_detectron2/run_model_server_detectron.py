@@ -1,7 +1,5 @@
 # import the necessary packages
-import torchvision
 import os
-import torch
 import logging
 
 from detectron2 import model_zoo
@@ -10,14 +8,11 @@ from detectron2.modeling import build_model
 from detectron2.data import transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
-import configargparse
 import numpy as np
-import settings
 import helpers
 import redis
 import time
 import json
-import random
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -29,8 +24,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # connect to Redis server
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT, db=settings.REDIS_DB)
+db = redis.StrictRedis(host=os.getenv("REDIS_HOST"),
+    port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB"))
 
 class DictToDotNotation:
     '''Useful class for getting dot notation access to dict'''
@@ -173,7 +168,7 @@ def classify_process():
     # continually pool for new images to classify
     while True:
         # monitor queue for jobs and grab one when present
-        q = db.blpop(settings.IMAGE_QUEUE)
+        q = db.blpop(os.getenv("IMAGE_QUEUE_DETECTRON2"))
         logger.info(q[0])
         q = q[1]
         imageIDs = []
@@ -184,9 +179,9 @@ def classify_process():
         img_width = q["width"]
         img_height = q["height"]
         image = helpers.base64_decode_image(q["image"],
-            settings.IMAGE_DTYPE,
+            os.getenv("IMAGE_DTYPE"),
             (1, img_height, img_width,
-                settings.IMAGE_CHANS))
+                os.getenv("IMAGE_CHANS")))
 
         # check to see if the batch list is None. Currently
         # only batch size of 1 is supported, future growth.
