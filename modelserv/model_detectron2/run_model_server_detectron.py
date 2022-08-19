@@ -1,6 +1,8 @@
 # import the necessary packages
 import os
 import logging
+import torch
+import torchvision
 
 from detectron2 import model_zoo
 from detectron2.config import get_cfg
@@ -156,7 +158,7 @@ def classify_process():
     args = {}
     args['model_config_file'] = 'fathomnet_config_v2_1280.yaml'
     args['model_weights_file'] = 'model_final.pth'
-    args['score_threshold'] = 0.2
+    args['score_threshold'] = 0.3
     args = DictToDotNotation(args)
 
     logger.info("Loading model...")
@@ -181,7 +183,7 @@ def classify_process():
         image = helpers.base64_decode_image(q["image"],
             os.getenv("IMAGE_DTYPE"),
             (1, img_height, img_width,
-                os.getenv("IMAGE_CHANS")))
+                int(os.getenv("IMAGE_CHANS"))))
 
         # check to see if the batch list is None. Currently
         # only batch size of 1 is supported, future growth.

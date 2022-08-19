@@ -282,6 +282,7 @@ class ModelServerFrontEnd {
       console.log(this._formBlobData);
       formdata.append("file", this._formBlobData);
       formdata.append("model_type", "image_queue_yolov5");
+      //formdata.append("model_type", "image_queue_detectron2");
 
       // original
       // formdata.append("file", this._fileInput.files[0]);
