@@ -89,8 +89,12 @@ The structure of this application is to create a web server that handles incomin
 
 Typically the docker container contains code to run an algorithm architecture, and specific model parameters such as weight files and class names need to be copied into the folder before launching/building the container. It is considered bad practice to check these into the repository, so they are usually made available elsewhere. This codebase has primarily been used for experiments with the [FathomNet](https://fathomnet.org) project, and uses examples from the [FathomNet Model Zoo](https://github.com/fathomnet/models). The model zoo has links to the required files to run some of the example architectures in this repository.
 
+![Model Server Architecture](./images/model-server-architecture.png)
+
+
 TODO
 
 - Add score thresholding
 - Configure CPU/GPU
 - Add health checks. Consider https://pypi.org/project/fastapi-health/
+- Reconfigure to add option for long running jobs. Use Redis Queues and AJAX for polling
