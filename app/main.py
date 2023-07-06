@@ -135,6 +135,16 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
         # sleep for a small amount to give the model a chance
         # to classify the input image
         time.sleep(float(os.getenv("CLIENT_SLEEP")))
+    
+    output = json.loads(output)
+    indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
+
+    # Get the index and area of the box with the largest area
+    largest_index, _ = max(indexed_areas, key=lambda x: x[1])
+    bounding_poly = output[0].get('poly')[largest_index]
+    bounding_box = output[0].get('box')[largest_index]
+    return_data["predictions"][0]['poly'] = bounding_poly
+    return_data["predictions"][0]['box'] = bounding_box
 
     # indicate that the request was a success
     return_data["success"] = True
@@ -175,6 +185,128 @@ def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     db.rpush(model_type, json.dumps(d))
     # keep looping until our model server returns the output
     # predictions
+    while True:
+        # attempt to grab the output predictions
+        output = db.get(k)
+
+        # check to see if our model has classified the input
+        # image
+        # print(f"  - output: {output}")
+        if output is not None:
+            # add the output predictions to our data
+            # dictionary so we can return it to the client
+            output = output.decode("utf-8")
+            data["predictions"] = json.loads(output)
+
+            # delete the result from the database and break
+            # from the polling loop
+            db.delete(k)
+            break
+
+        # sleep for a small amount to give the model a chance
+        # to classify the input image
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
+
+    # indicate that the request was a success
+    data["success"] = True
+    return_data = jsonable_encoder(data)
+    # return the data dictionary as a JSON response
+    return JSONResponse(content=return_data)
+
+@app.post("/filet_predictor/")
+def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
+    # initialize the data dictionary that will be returned from the
+    # view
+    data = {"success": False}
+    # ensure an image was properly uploaded to our endpoint
+    # read the image in PIL format and prepare it for
+    # classification
+    #image = flask.request.files["image"].read()
+    #image = Image.open(io.BytesIO(file.file))
+    logger.info(model_type)
+    image = Image.open(file.file)
+    image = np.array(image)
+
+    #image = Image.open(file.file)
+    height, width, channels = image.shape
+    # if the image mode is not RGB, convert it
+    if channels == 1:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif channels == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+
+    encoded_image = np.expand_dims(image, axis=0)
+    logger.info(f"Image original dimesions: {width}x{height}")
+    # ensure our NumPy array is C-contiguous as well,
+    # otherwise we won't be able to serialize it
+    encoded_image = image.copy(order="C")
+
+    k = str(uuid.uuid4())
+    encoded_image = helpers.base64_encode_image(encoded_image)
+    data = [{'x' : int(width/2), 'y' : int(height/2)}]
+    d = {"id": k, "image": encoded_image, "height": height, "width": width, "prompts": data}
+    db.rpush("image_queue_sam", json.dumps(d))
+
+    while True:
+        # attempt to grab the output predictions
+        output = db.get(k)
+
+        # check to see if our model has classified the input
+        # image
+        # print(f"  - output: {output}")
+        if output is not None:
+            # add the output predictions to our data
+            # dictionary so we can return it to the client
+            output = output.decode("utf-8")
+
+            # delete the result from the database and break
+            # from the polling loop
+            db.delete(k)
+            break
+
+        # sleep for a small amount to give the model a chance
+        # to classify the input image
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
+
+    output = json.loads(output)
+    indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
+
+    if not indexed_areas:
+        largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
+    else:
+        # Get the index and area of the box with the largest area
+        largest_index, _ = max(indexed_areas, key=lambda x: x[1])
+        
+    bounding_poly = np.array(output[0].get('poly')[largest_index])
+
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+    cv2.fillPoly(mask, [bounding_poly], 255)
+    kernel = np.ones((int(height*0.01),int(height*0.01)),np.uint8)
+    #kernel = np.ones((10,10),np.uint8)
+    dilated_mask = cv2.dilate(mask, kernel, iterations = 1)
+    extracted = cv2.bitwise_and(image, image, mask=dilated_mask)
+    background = np.zeros_like(image)
+    background[:] = [0, 0, 0]
+    background[dilated_mask == 255] = extracted[dilated_mask == 255]
+
+    # Convert to BGR for class prediction
+    image = background[:, :, ::-1].copy()
+    image = np.expand_dims(image, axis=0)
+    logger.info(f"Image original dimesions: {width}x{height}")
+    # ensure our NumPy array is C-contiguous as well,
+    # otherwise we won't be able to serialize it
+    image = image.copy(order="C")
+
+    # generate an ID for the classification then add the
+    # classification ID + image to the queue
+    k = str(uuid.uuid4())
+    image = helpers.base64_encode_image(image.astype('float32'))
+    d = {"id": k, "image": image, "height": height, "width": width}
+    db.rpush(model_type, json.dumps(d))
+    # keep looping until our model server returns the output
+    # predictions
+    data = {"success": False}
+    data["segments"] = {"poly" : bounding_poly.tolist(), "box" : output[0].get('box')[largest_index]}
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
