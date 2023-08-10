@@ -138,14 +138,110 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
     
     output = json.loads(output)
     indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
-
-    # Get the index and area of the box with the largest area
-    largest_index, _ = max(indexed_areas, key=lambda x: x[1])
+    if not indexed_areas:
+        print("no high scores")
+        lst = output[0].get('score')
+        print(lst)
+        largest_index = max(range(len(lst)), key=lst.__getitem__)
+        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
+    else:
+        # Get the index and area of the box with the higest score
+        indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score')))]
+        largest_index, _ = max(indexed_scores, key=lambda x: x[1])
+        #largest_index, _ = max(indexed_areas, key=lambda x: x[1])
+    #boxes = output[0].get('box')
+    #areas = [box['w'] * box['h'] for box in boxes]
+    #largest_box_index = areas.index(max(areas))
     bounding_poly = output[0].get('poly')[largest_index]
     bounding_box = output[0].get('box')[largest_index]
+
     return_data["predictions"][0]['poly'] = bounding_poly
     return_data["predictions"][0]['box'] = bounding_box
 
+    return_data["success"] = True
+    return_data = jsonable_encoder(return_data)
+    # return the data dictionary as a JSON response
+    return JSONResponse(content=return_data)
+
+@app.post("/sam_multi/")
+def predict_sam_multi(data: str = Form(...), file: UploadFile = File(...)):
+    logger.info(data)
+    
+    #parsed_data = parse_obj_as(List[SamPrompt], data)
+    return_data = {"success": False}
+    logger.info(f"Prompts: {data}")
+    data = json.loads(data)
+    contents = file.file.read()
+    np_array = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(np_array,cv2.IMREAD_COLOR)
+
+    #image = Image.open(file.file)
+    height, width, channels = image.shape
+    # if the image mode is not RGB, convert it
+    if channels == 1:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif channels == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+    else:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    #image = np.array(image).astype('float32')
+    #image = np.array(image).astype('uint8')
+    # convert to BGR, because that's what the model expects
+    #image = image[:, :, ::-1].copy()
+    image = np.expand_dims(image, axis=0)
+    logger.info(f"Image original dimesions: {width}x{height}")
+    # ensure our NumPy array is C-contiguous as well,
+    # otherwise we won't be able to serialize it
+    image = image.copy(order="C")
+
+    k = str(uuid.uuid4())
+    image = helpers.base64_encode_image(image)
+    d = {"id": k, "image": image, "height": height, "width": width, "prompts": data}
+    db.rpush("image_queue_sam", json.dumps(d))
+
+    while True:
+        # attempt to grab the output predictions
+        output = db.get(k)
+
+        # check to see if our model has classified the input
+        # image
+        # print(f"  - output: {output}")
+        if output is not None:
+            # add the output predictions to our data
+            # dictionary so we can return it to the client
+            output = output.decode("utf-8")
+            return_data["predictions"] = json.loads(output)
+
+            # delete the result from the database and break
+            # from the polling loop
+            db.delete(k)
+            break
+
+        # sleep for a small amount to give the model a chance
+        # to classify the input image
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
+    '''
+    output = json.loads(output)
+    indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
+    if not indexed_areas:
+        print("no high scores")
+        lst = output[0].get('score')
+        print(lst)
+        largest_index = max(range(len(lst)), key=lst.__getitem__)
+        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
+    else:
+        # Get the index and area of the box with the largest area
+        largest_index, _ = max(indexed_areas, key=lambda x: x[1])
+    #boxes = output[0].get('box')
+    #areas = [box['w'] * box['h'] for box in boxes]
+    #largest_box_index = areas.index(max(areas))
+    bounding_poly = output[0].get('poly')[largest_index]
+    bounding_box = output[0].get('box')[largest_index]
+
+    return_data["predictions"][0]['poly'] = bounding_poly
+    return_data["predictions"][0]['box'] = bounding_box
+    '''
     # indicate that the request was a success
     return_data["success"] = True
     return_data = jsonable_encoder(return_data)
@@ -270,18 +366,32 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
 
     output = json.loads(output)
     indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
+    indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score'))) if box['w']/width > 0.7 or box['h']/height > 0.7]
 
+    if not indexed_scores:
+        logger.info('no high large areas')
+        indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score')))]
+
+    largest_index, _ = max(indexed_scores, key=lambda x: x[1])
+    logger.info(f"Scores: {output[0].get('score')}")
+    logger.info(f"Index: {largest_index}")
+    '''
     if not indexed_areas:
-        largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
+        print("no high scores")
+        lst = output[0].get('score')
+        print(lst)
+        largest_index = max(range(len(lst)), key=lst.__getitem__)
+        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
     else:
         # Get the index and area of the box with the largest area
         largest_index, _ = max(indexed_areas, key=lambda x: x[1])
-        
+    '''
+
     bounding_poly = np.array(output[0].get('poly')[largest_index])
 
     mask = np.zeros(image.shape[:2], dtype=np.uint8)
     cv2.fillPoly(mask, [bounding_poly], 255)
-    kernel = np.ones((int(height*0.01),int(height*0.01)),np.uint8)
+    kernel = np.ones((int(width*0.01),int(width*0.01)),np.uint8)
     #kernel = np.ones((10,10),np.uint8)
     dilated_mask = cv2.dilate(mask, kernel, iterations = 1)
     extracted = cv2.bitwise_and(image, image, mask=dilated_mask)
@@ -331,6 +441,7 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
 
     # indicate that the request was a success
     data["success"] = True
+    logger.info("made it here?")
     return_data = jsonable_encoder(data)
     # return the data dictionary as a JSON response
     return JSONResponse(content=return_data)
