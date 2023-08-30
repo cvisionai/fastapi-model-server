@@ -1,11 +1,12 @@
 # import the necessary packages
-from fastapi import FastAPI, File, UploadFile, Form, Body, Response
+from fastapi import FastAPI, File, UploadFile, Form, Depends, Response
 from pydantic import BaseModel, parse_obj_as
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import FileResponse
+from .routers import sam_router
 from PIL import Image
 from typing import List, Dict
 import numpy as np
@@ -18,6 +19,7 @@ import json
 import io
 import logging
 import cv2
+#from .database import get_db
 
 logging.basicConfig(
     handlers=[logging.StreamHandler()],
@@ -28,7 +30,34 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+host = os.getenv("REDIS_HOST", "localhost")
+port = int(os.getenv("REDIS_PORT", 6379))
+db = int(os.getenv("REDIS_DB", 0))
+
+pool = redis.ConnectionPool(host=host,
+                            port=port,
+                            db=db)
+
+db = redis.Redis(connection_pool=pool)
+
+def get_db():
+    db = redis.Redis(connection_pool=pool)
+    return db
+
+# Try to connect to Redis
+for _ in range(5):
+    try:
+        db.ping()
+        break
+    except redis.ConnectionError:
+        logger.info("Could not connect to Redis. Retrying in 5 seconds...")
+        time.sleep(5)
+else:
+    raise Exception("Could not connect to Redis.")
+
 app = FastAPI()
+
+app.include_router(sam_router.router, dependencies=[Depends(get_db)])
 
 origins = [
     "http://fast.localhost",
@@ -46,12 +75,6 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="/static-files"), name="static")
-
-db = redis.StrictRedis(host=os.getenv("REDIS_HOST"),
-    port=os.getenv("REDIS_PORT"), db=os.getenv("REDIS_DB"))
-db.ping() 
-
-print(f"connected to redis: {os.getenv('REDIS_HOST')}") 
 
 class SamPrompt(BaseModel):
     x1 : int
@@ -167,9 +190,7 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
     if not indexed_areas:
         print("no high scores")
         lst = output[0].get('score')
-        print(lst)
         largest_index = max(range(len(lst)), key=lst.__getitem__)
-        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
     else:
         # Get the index and area of the box with the higest score
         indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score')))]
@@ -341,7 +362,6 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
         time.sleep(float(os.getenv("CLIENT_SLEEP")))
 
     output = json.loads(output)
-    indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
     indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score'))) if box['w']/width > 0.7 or box['h']/height > 0.7]
 
     if not indexed_scores:
@@ -351,17 +371,6 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
     largest_index, _ = max(indexed_scores, key=lambda x: x[1])
     logger.info(f"Scores: {output[0].get('score')}")
     logger.info(f"Index: {largest_index}")
-    '''
-    if not indexed_areas:
-        print("no high scores")
-        lst = output[0].get('score')
-        print(lst)
-        largest_index = max(range(len(lst)), key=lst.__getitem__)
-        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
-    else:
-        # Get the index and area of the box with the largest area
-        largest_index, _ = max(indexed_areas, key=lambda x: x[1])
-    '''
 
     bounding_poly = np.array(output[0].get('poly')[largest_index])
 
@@ -396,10 +405,6 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client
@@ -422,8 +427,6 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # return the data dictionary as a JSON response
     return JSONResponse(content=return_data)
 
-# for debugging purposes, it's helpful to start the Flask testing
-# server (don't use this for production)
 if __name__ == "__main__":
     print("* Starting web service...")
     app.run()
