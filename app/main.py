@@ -1,5 +1,5 @@
 # import the necessary packages
-from fastapi import FastAPI, File, UploadFile, Form, Body
+from fastapi import FastAPI, File, UploadFile, Form, Body, Response
 from pydantic import BaseModel, parse_obj_as
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -76,6 +76,72 @@ def prepare_image(image, target):
 @app.get("/")
 async def homepage():
     return FileResponse('/static-files/index.html')
+
+@app.post("/sam-embed/")
+def predict_sam_embed(file: UploadFile = File(...)):
+    return_data = {"success": False}
+    
+    contents = file.file.read()
+    np_array = np.frombuffer(contents, np.uint8)
+    image = cv2.imdecode(np_array,cv2.IMREAD_COLOR)
+
+    #image = Image.open(file.file)
+    height, width, channels = image.shape
+    # if the image mode is not RGB, convert it
+    if channels == 1:
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+    elif channels == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
+    else:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    #image = np.array(image).astype('float32')
+    #image = np.array(image).astype('uint8')
+    # convert to BGR, because that's what the model expects
+    #image = image[:, :, ::-1].copy()
+    image = np.expand_dims(image, axis=0)
+    logger.info(f"Image original dimesions: {width}x{height}")
+    # ensure our NumPy array is C-contiguous as well,
+    # otherwise we won't be able to serialize it
+    image = image.copy(order="C")
+
+    k = str(uuid.uuid4())
+    image = helpers.base64_encode_image(image)
+    d = {"id": k, "image": image, "height": height, "width": width, "prompts": {"fake" : "data"}, "embedding" : True}
+    db.rpush("image_queue_sam", json.dumps(d))
+
+    while True:
+        # attempt to grab the output predictions
+        output = db.get(k)
+
+        # check to see if our model has classified the input
+        # image
+        # print(f"  - output: {output}")
+        if output is not None:
+            # add the output predictions to our data
+            # dictionary so we can return it to the client
+            #output = output.decode("utf-8")
+            #return_data["predictions"] = json.loads(output)
+
+            # delete the result from the database and break
+            # from the polling loop
+            db.delete(k)
+            break
+
+        # sleep for a small amount to give the model a chance
+        # to classify the input image
+        time.sleep(float(os.getenv("CLIENT_SLEEP")))
+    return Response(content=output, media_type="application/octet-stream")
+    return_data["success"] = True
+    return_data = jsonable_encoder(return_data)
+    # return the data dictionary as a JSON response
+    return JSONResponse(content=return_data)
+
+@app.get("/test-data/")
+def get_test_data():
+    data = np.random.random(1000).astype(np.float32)
+    byte_data = data.tobytes()
+    return Response(content=byte_data, media_type="application/octet-stream")
 
 @app.post("/sam/")
 def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
