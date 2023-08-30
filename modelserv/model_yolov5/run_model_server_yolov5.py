@@ -15,7 +15,7 @@ from pathlib import Path
 
 import numpy as np
 
-ROOT = '/yolov5' # YOLOv5 root directory
+ROOT = '/work/yolov5' # YOLOv5 root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
