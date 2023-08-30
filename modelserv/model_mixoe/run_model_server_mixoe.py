@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.transforms as trn
-from torchvision.models import efficientnet_b6
+from torchvision.models import efficientnet_b7
 from PIL import Image
 import cv2
 import argparse
@@ -48,7 +48,7 @@ class Letterbox(object):
         assert isinstance(new_shape, (int, tuple))
         self.new_shape = new_shape
 
-    def __call__(self,im, color=(114, 114, 114)): 
+    def __call__(self,im, color=(255, 255, 255)): 
         im = np.array(im)
         shape = im.shape[:2]  # current shape [height, width], assumes HWC
         if isinstance(self.new_shape, int):
@@ -75,7 +75,7 @@ class Letterbox(object):
 def load_model(args):
     '''Load model architecture and weights
     '''
-    net = efficientnet_b6(pretrained=True)
+    net = efficientnet_b7(pretrained=True)
     in_features = net.classifier[1].in_features
     new_fc = nn.Linear(in_features, NUM_CLASSES)
     net.classifier = nn.Sequential(nn.Dropout(p=0.5, inplace=True),new_fc)
