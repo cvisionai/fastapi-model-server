@@ -14,7 +14,7 @@ services:
       - "--providers.file.directory=/configuration"
       - "--providers.file.watch=true"
     ports:
-      - "8082:8082"
+      - "8083:8083"
       - "8080:8080"
     networks:
       - backend
@@ -45,14 +45,16 @@ services:
       - traefik-public
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.fast.rule=Host(`${SERVER_HOST}`)"
+      - "traefik.http.routers.fast.rule=PathPrefix(`/model/v1/`) && Host(`${SERVER_HOST}`)"
+      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/model/v1"
+      #- "traefik.http.routers.fast.middlewares=strip-prefix"
       - "traefik.http.routers.fast.entrypoints=web"
-      - "traefik.http.routers.fast.tls=true"
+      #- "traefik.http.routers.fast.tls=true"
       - "traefik.http.middlewares.addHeader.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT"
       - "traefik.http.middlewares.addHeader.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.addHeader.headers.accesscontrolmaxage=100"
       - "traefik.http.middlewares.addHeader.headers.addvaryheader=true"
-      - "traefik.http.routers.fast.middlewares=addHeader"
+      - "traefik.http.routers.fast.middlewares=addHeader,strip-prefix"
     volumes:
       - ./app:/app/app
       - ./images:/images
@@ -83,7 +85,7 @@ services:
       - "traefik.http.routers.redis.rule=Host(`redis.localhost`)"
       - "traefik.port=${REDIS_PORT}"
     entrypoint: redis-server --maxmemory 2048mb --maxmemory-policy allkeys-lru
- 
+  
   modelserv_yolov5:
     image: modelserv_yolov5:latest
     build: 
@@ -110,6 +112,32 @@ services:
       - ./images:/images
       - ./script:/script
 
+  modelserv_mixoe:
+    image: modelserv_mixoe:latest
+    build: 
+      context: .
+      dockerfile: ./modelserv/model_mixoe/Dockerfile
+
+    #container_name: "modelserv"
+    env_file:
+      - ./.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0']
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.modelserv_mixoe.rule=Host(`modelserv_mixoe.localhost`)"
+      - "traefik.http.routers.modelserv_mixoe.entrypoints=web"
+    volumes:
+      - ./images:/images
+      - ./script:/script
+  
   modelserv_detectron2:
     image: modelserv_detectron2:latest
     build: 
@@ -135,6 +163,28 @@ services:
       - ./images:/images
       - ./script:/script
 
+  modelserv_sam:
+    image: cvisionai/segment_anything:multimask
+    #container_name: "modelserv"
+    env_file:
+      - ./.env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0']
+    networks:
+      - backend
+      - traefik-public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.modelserv_sam.rule=Host(`modelserv_sam.localhost`)"
+      - "traefik.http.routers.modelserv_sam.entrypoints=web"
+    volumes:
+      - ./images:/images
+      - ./script:/script
+  
 networks:
   traefik-public:
     external: true
