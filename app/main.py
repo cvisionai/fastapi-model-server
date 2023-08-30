@@ -84,8 +84,6 @@ def predict_sam_embed(file: UploadFile = File(...)):
     contents = file.file.read()
     np_array = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(np_array,cv2.IMREAD_COLOR)
-
-    #image = Image.open(file.file)
     height, width, channels = image.shape
     # if the image mode is not RGB, convert it
     if channels == 1:
@@ -94,17 +92,11 @@ def predict_sam_embed(file: UploadFile = File(...)):
         image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGB)
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-    #image = np.array(image).astype('float32')
-    #image = np.array(image).astype('uint8')
-    # convert to BGR, because that's what the model expects
-    #image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")
-
     k = str(uuid.uuid4())
     image = helpers.base64_encode_image(image)
     d = {"id": k, "image": image, "height": height, "width": width, "prompts": {"fake" : "data"}, "embedding" : True}
@@ -113,16 +105,7 @@ def predict_sam_embed(file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
-            # add the output predictions to our data
-            # dictionary so we can return it to the client
-            #output = output.decode("utf-8")
-            #return_data["predictions"] = json.loads(output)
-
             # delete the result from the database and break
             # from the polling loop
             db.delete(k)
@@ -132,30 +115,16 @@ def predict_sam_embed(file: UploadFile = File(...)):
         # to classify the input image
         time.sleep(float(os.getenv("CLIENT_SLEEP")))
     return Response(content=output, media_type="application/octet-stream")
-    return_data["success"] = True
-    return_data = jsonable_encoder(return_data)
-    # return the data dictionary as a JSON response
-    return JSONResponse(content=return_data)
-
-@app.get("/test-data/")
-def get_test_data():
-    data = np.random.random(1000).astype(np.float32)
-    byte_data = data.tobytes()
-    return Response(content=byte_data, media_type="application/octet-stream")
 
 @app.post("/sam/")
 def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
     logger.info(data)
-    
-    #parsed_data = parse_obj_as(List[SamPrompt], data)
     return_data = {"success": False}
     logger.info(f"Prompts: {data}")
     data = json.loads(data)
     contents = file.file.read()
     np_array = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(np_array,cv2.IMREAD_COLOR)
-
-    #image = Image.open(file.file)
     height, width, channels = image.shape
     # if the image mode is not RGB, convert it
     if channels == 1:
@@ -165,10 +134,6 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    #image = np.array(image).astype('float32')
-    #image = np.array(image).astype('uint8')
-    # convert to BGR, because that's what the model expects
-    #image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
     # ensure our NumPy array is C-contiguous as well,
@@ -183,16 +148,11 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client
             output = output.decode("utf-8")
             return_data["predictions"] = json.loads(output)
-
             # delete the result from the database and break
             # from the polling loop
             db.delete(k)
@@ -214,10 +174,7 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
         # Get the index and area of the box with the higest score
         indexed_scores = [(i,score) for i, (box,score) in enumerate(zip(output[0].get('box'),output[0].get('score')))]
         largest_index, _ = max(indexed_scores, key=lambda x: x[1])
-        #largest_index, _ = max(indexed_areas, key=lambda x: x[1])
-    #boxes = output[0].get('box')
-    #areas = [box['w'] * box['h'] for box in boxes]
-    #largest_box_index = areas.index(max(areas))
+
     bounding_poly = output[0].get('poly')[largest_index]
     bounding_box = output[0].get('box')[largest_index]
 
@@ -232,16 +189,12 @@ def predict_sam(data: str = Form(...), file: UploadFile = File(...)):
 @app.post("/sam_multi/")
 def predict_sam_multi(data: str = Form(...), file: UploadFile = File(...)):
     logger.info(data)
-    
-    #parsed_data = parse_obj_as(List[SamPrompt], data)
     return_data = {"success": False}
     logger.info(f"Prompts: {data}")
     data = json.loads(data)
     contents = file.file.read()
     np_array = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(np_array,cv2.IMREAD_COLOR)
-
-    #image = Image.open(file.file)
     height, width, channels = image.shape
     # if the image mode is not RGB, convert it
     if channels == 1:
@@ -251,10 +204,6 @@ def predict_sam_multi(data: str = Form(...), file: UploadFile = File(...)):
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    #image = np.array(image).astype('float32')
-    #image = np.array(image).astype('uint8')
-    # convert to BGR, because that's what the model expects
-    #image = image[:, :, ::-1].copy()
     image = np.expand_dims(image, axis=0)
     logger.info(f"Image original dimesions: {width}x{height}")
     # ensure our NumPy array is C-contiguous as well,
@@ -269,10 +218,6 @@ def predict_sam_multi(data: str = Form(...), file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client
@@ -287,27 +232,7 @@ def predict_sam_multi(data: str = Form(...), file: UploadFile = File(...)):
         # sleep for a small amount to give the model a chance
         # to classify the input image
         time.sleep(float(os.getenv("CLIENT_SLEEP")))
-    '''
-    output = json.loads(output)
-    indexed_areas = [(i, box['w'] * box['h']) for i, (box, score) in enumerate(zip(output[0].get('box'), output[0].get('score'))) if score > 0.9]
-    if not indexed_areas:
-        print("no high scores")
-        lst = output[0].get('score')
-        print(lst)
-        largest_index = max(range(len(lst)), key=lst.__getitem__)
-        #largest_index, _ = max(enumerate(output[0].get('score')), key=lambda x: x[1][0])
-    else:
-        # Get the index and area of the box with the largest area
-        largest_index, _ = max(indexed_areas, key=lambda x: x[1])
-    #boxes = output[0].get('box')
-    #areas = [box['w'] * box['h'] for box in boxes]
-    #largest_box_index = areas.index(max(areas))
-    bounding_poly = output[0].get('poly')[largest_index]
-    bounding_box = output[0].get('box')[largest_index]
 
-    return_data["predictions"][0]['poly'] = bounding_poly
-    return_data["predictions"][0]['box'] = bounding_box
-    '''
     # indicate that the request was a success
     return_data["success"] = True
     return_data = jsonable_encoder(return_data)
@@ -322,8 +247,6 @@ def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # ensure an image was properly uploaded to our endpoint
     # read the image in PIL format and prepare it for
     # classification
-    #image = flask.request.files["image"].read()
-    #image = Image.open(io.BytesIO(file.file))
     logger.info(model_type)
     image = Image.open(file.file)
     width, height = image.size
@@ -338,7 +261,6 @@ def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # ensure our NumPy array is C-contiguous as well,
     # otherwise we won't be able to serialize it
     image = image.copy(order="C")
-
     # generate an ID for the classification then add the
     # classification ID + image to the queue
     k = str(uuid.uuid4())
@@ -350,16 +272,11 @@ def predict(model_type: str = Form(...), file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client
             output = output.decode("utf-8")
             data["predictions"] = json.loads(output)
-
             # delete the result from the database and break
             # from the polling loop
             db.delete(k)
@@ -383,8 +300,6 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
     # ensure an image was properly uploaded to our endpoint
     # read the image in PIL format and prepare it for
     # classification
-    #image = flask.request.files["image"].read()
-    #image = Image.open(io.BytesIO(file.file))
     logger.info(model_type)
     image = Image.open(file.file)
     image = np.array(image)
@@ -412,15 +327,10 @@ def filet_predict(model_type: str = Form(...), file: UploadFile = File(...)):
     while True:
         # attempt to grab the output predictions
         output = db.get(k)
-
-        # check to see if our model has classified the input
-        # image
-        # print(f"  - output: {output}")
         if output is not None:
             # add the output predictions to our data
             # dictionary so we can return it to the client
             output = output.decode("utf-8")
-
             # delete the result from the database and break
             # from the polling loop
             db.delete(k)
