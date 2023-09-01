@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.post("/sam-embed_v2/")
+@router.post("/sam-embed/")
 def predict_sam_embed(db: redis.Redis = Depends(get_db), file: UploadFile = File(...)):
     contents = file.file.read()
     k = str(uuid.uuid4())
