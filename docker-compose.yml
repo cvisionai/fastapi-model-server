@@ -47,7 +47,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.fast.rule=PathPrefix(`/model/v1/`) && Host(`${SERVER_HOST}`)"
       - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/model/v1"
-      #- "traefik.http.routers.fast.middlewares=strip-prefix"
       - "traefik.http.routers.fast.entrypoints=web"
       #- "traefik.http.routers.fast.tls=true"
       - "traefik.http.middlewares.addHeader.headers.accesscontrolallowmethods=GET,POST,OPTIONS,PUT"
@@ -88,11 +87,10 @@ services:
   
   modelserv_yolov5:
     image: modelserv_yolov5:latest
+    restart: on-failure:5
     build: 
       context: .
       dockerfile: ./modelserv/model_yolov5/Dockerfile
-
-    #container_name: "modelserv"
     env_file:
       - ./.env
     deploy:
@@ -114,11 +112,10 @@ services:
 
   modelserv_mixoe:
     image: modelserv_mixoe:latest
+    restart: on-failure:5
     build: 
       context: .
       dockerfile: ./modelserv/model_mixoe/Dockerfile
-
-    #container_name: "modelserv"
     env_file:
       - ./.env
     deploy:
@@ -140,10 +137,10 @@ services:
   
   modelserv_detectron2:
     image: modelserv_detectron2:latest
+    restart: on-failure:5
     build: 
       context: .
       dockerfile: ./modelserv/model_detectron2/Dockerfile
-    #container_name: "modelserv"
     env_file:
       - ./.env
     deploy:
@@ -165,7 +162,7 @@ services:
 
   modelserv_sam:
     image: cvisionai/segment_anything:multimask
-    #container_name: "modelserv"
+    restart: on-failure:5
     env_file:
       - ./.env
     deploy:
