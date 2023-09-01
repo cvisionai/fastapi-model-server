@@ -75,7 +75,8 @@ class Letterbox(object):
 def load_model(args):
     '''Load model architecture and weights
     '''
-    net = efficientnet_b7(pretrained=True)
+    #net = efficientnet_b7(pretrained=True)
+    net = efficientnet_b7(pretrained=False)
     in_features = net.classifier[1].in_features
     new_fc = nn.Linear(in_features, NUM_CLASSES)
     net.classifier = nn.Sequential(nn.Dropout(p=0.5, inplace=True),new_fc)
